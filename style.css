@@ -1,0 +1,415 @@
+/* Aviation-themed PPL Simulator CSS */
+
+:root {
+    /* Aviation Color Palette */
+    --aviation-blue: #1E3A5F;
+    --medium-blue: #2E5984;
+    --sky-blue: #4A90B8;
+    --light-sky: #87CEEB;
+    
+    /* Instrument Colors */
+    --instrument-dark: #2C2C2C;
+    --instrument-beige: #F5F5DC;
+    --warning-red: #FF4444;
+    --success-green: #44AA44;
+    --caution-orange: #FFA500;
+    --gold: #FFD700;
+    
+    /* Typography */
+    --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Monaco', monospace;
+    
+    /* Spacing */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-main);
+    background: linear-gradient(135deg, var(--aviation-blue) 0%, var(--medium-blue) 100%);
+    color: white;
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-sm);
+}
+
+/* Header Styles */
+header {
+    text-align: center;
+    padding: var(--spacing-md) 0;
+    border-bottom: 2px solid var(--sky-blue);
+    margin-bottom: var(--spacing-lg);
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: var(--spacing-sm);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.progress-info {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-lg);
+    font-size: 1.1rem;
+}
+
+.progress-info span {
+    background: rgba(255,255,255,0.1);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+}
+
+/* Stats Panel */
+.stats-panel {
+    margin-bottom: var(--spacing-lg);
+}
+
+.stats-panel h2 {
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+    color: var(--light-sky);
+}
+
+.instruments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.gauge {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid var(--sky-blue);
+    border-radius: 15px;
+    padding: var(--spacing-md);
+    text-align: center;
+    backdrop-filter: blur(10px);
+    transition: transform 0.2s ease;
+}
+
+.gauge:hover {
+    transform: translateY(-2px);
+}
+
+.gauge-label {
+    font-size: 0.9rem;
+    color: var(--light-sky);
+    margin-bottom: var(--spacing-xs);
+}
+
+.gauge-value {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: var(--spacing-sm);
+    font-family: var(--font-mono);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    background: var(--success-green);
+}
+
+/* Dynamic gauge colors */
+#morale-bar { background: var(--sky-blue); }
+#knowledge-bar { background: var(--success-green); }
+#safety-bar { background: var(--caution-orange); }
+#money-bar { background: var(--gold); }
+#hours-bar { background: var(--light-sky); }
+#progress-bar { background: var(--success-green); }
+
+/* Event Section */
+.event-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.event-card {
+    background: rgba(255,255,255,0.95);
+    color: var(--instrument-dark);
+    border-radius: 12px;
+    padding: var(--spacing-lg);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    border-left: 4px solid var(--sky-blue);
+}
+
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    font-weight: bold;
+}
+
+.event-week {
+    color: var(--aviation-blue);
+    font-family: var(--font-mono);
+}
+
+.event-type {
+    font-size: 1.1rem;
+}
+
+.event-content {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: var(--spacing-md);
+}
+
+.event-stats {
+    font-size: 0.9rem;
+    color: var(--medium-blue);
+    font-style: italic;
+}
+
+/* Action Buttons */
+.actions-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.actions-section h3 {
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+    color: var(--light-sky);
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.action-btn {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid var(--sky-blue);
+    border-radius: 12px;
+    padding: var(--spacing-md);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    min-height: 80px;
+}
+
+.action-btn:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.btn-content {
+    text-align: left;
+}
+
+.btn-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.btn-description {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* Logbook Section */
+.logbook-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.logbook-section h3 {
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+    color: var(--light-sky);
+}
+
+.logbook {
+    background: rgba(255,255,255,0.95);
+    color: var(--instrument-dark);
+    border-radius: 12px;
+    padding: var(--spacing-lg);
+    font-family: var(--font-mono);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.logbook-header {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 1fr;
+    gap: var(--spacing-sm);
+    font-weight: bold;
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 2px solid var(--aviation-blue);
+    margin-bottom: var(--spacing-sm);
+}
+
+.logbook-entries {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: var(--spacing-sm);
+}
+
+.logbook-entry {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 1fr;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.logbook-totals {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 1fr;
+    gap: var(--spacing-sm);
+    font-weight: bold;
+    padding-top: var(--spacing-xs);
+    border-top: 2px solid var(--aviation-blue);
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: var(--spacing-lg) 0;
+}
+
+.game-controls {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.game-controls button {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid var(--sky-blue);
+    border-radius: 8px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.game-controls button:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: var(--spacing-xs);
+    }
+    
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    .progress-info {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .instruments-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
+    }
+    
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .logbook-header,
+    .logbook-entry,
+    .logbook-totals {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-xs);
+    }
+    
+    .logbook-header span:nth-child(2),
+    .logbook-entry span:nth-child(2),
+    .logbook-totals span:nth-child(2) {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 480px) {
+    .instruments-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .gauge {
+        padding: var(--spacing-sm);
+    }
+    
+    .event-card {
+        padding: var(--spacing-md);
+    }
+    
+    .logbook {
+        padding: var(--spacing-md);
+    }
+}
+
+/* Animation for stat changes */
+@keyframes statChange {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.stat-updated {
+    animation: statChange 0.3s ease-in-out;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Status-based coloring for gauges */
+.gauge.critical .gauge-value { color: var(--warning-red); }
+.gauge.warning .gauge-value { color: var(--caution-orange); }
+.gauge.good .gauge-value { color: var(--success-green); }
+
+.gauge.critical .progress-fill { background: var(--warning-red) !important; }
+.gauge.warning .progress-fill { background: var(--caution-orange) !important; }
+.gauge.good .progress-fill { background: var(--success-green) !important; }

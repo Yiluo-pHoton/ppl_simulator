@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Pilot License Simulator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛩️ PPL Simulator</h1>
+            <div class="progress-info">
+                <span id="week-counter">Week 1</span>
+                <span id="phase-indicator">Ground School</span>
+            </div>
+        </header>
+
+        <main>
+            <!-- Player Stats Panel -->
+            <section class="stats-panel">
+                <h2>Flight Instruments</h2>
+                <div class="instruments-grid">
+                    <div class="gauge" id="morale-gauge">
+                        <div class="gauge-label">Morale</div>
+                        <div class="gauge-value" id="morale-value">75%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="morale-bar"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="gauge" id="knowledge-gauge">
+                        <div class="gauge-label">Knowledge</div>
+                        <div class="gauge-value" id="knowledge-value">30%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="knowledge-bar"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="gauge" id="safety-gauge">
+                        <div class="gauge-label">Safety</div>
+                        <div class="gauge-value" id="safety-value">80%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="safety-bar"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="gauge" id="money-gauge">
+                        <div class="gauge-label">Budget</div>
+                        <div class="gauge-value" id="money-value">$15,000</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="money-bar"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="gauge" id="hours-gauge">
+                        <div class="gauge-label">Flight Hours</div>
+                        <div class="gauge-value" id="hours-value">0.0</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="hours-bar"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="gauge" id="progress-gauge">
+                        <div class="gauge-label">Progress</div>
+                        <div class="gauge-value" id="progress-value">0%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-bar"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Event Display -->
+            <section class="event-section">
+                <div class="event-card" id="event-card">
+                    <div class="event-header">
+                        <span class="event-week">Week 1</span>
+                        <span class="event-type">📚 Ground School</span>
+                    </div>
+                    <div class="event-content" id="event-text">
+                        Welcome to flight training! You've just signed up for ground school at your local flight training center. Your instructor mentions that weather has been unpredictable lately, but you're excited to start your journey toward becoming a private pilot.
+                    </div>
+                    <div class="event-stats" id="event-impact"></div>
+                </div>
+            </section>
+
+            <!-- Action Buttons -->
+            <section class="actions-section">
+                <h3>What's your plan for this week?</h3>
+                <div class="action-buttons">
+                    <button class="action-btn" id="study-btn" onclick="takeAction('study')">
+                        <span class="btn-icon">📚</span>
+                        <div class="btn-content">
+                            <div class="btn-title">Study</div>
+                            <div class="btn-description">Hit the books (Free)</div>
+                        </div>
+                    </button>
+                    
+                    <button class="action-btn" id="fly-btn" onclick="takeAction('fly')">
+                        <span class="btn-icon">✈️</span>
+                        <div class="btn-content">
+                            <div class="btn-title">Schedule Flight</div>
+                            <div class="btn-description">Book lesson ($250)</div>
+                        </div>
+                    </button>
+                    
+                    <button class="action-btn" id="rest-btn" onclick="takeAction('rest')">
+                        <span class="btn-icon">😴</span>
+                        <div class="btn-content">
+                            <div class="btn-title">Rest</div>
+                            <div class="btn-description">Take a break (Free)</div>
+                        </div>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Logbook Section -->
+            <section class="logbook-section">
+                <h3>Flight Logbook</h3>
+                <div class="logbook">
+                    <div class="logbook-header">
+                        <span>Date</span>
+                        <span>Activity</span>
+                        <span>Hours</span>
+                        <span>Cost</span>
+                    </div>
+                    <div class="logbook-entries" id="logbook-entries">
+                        <div class="logbook-entry">
+                            <span>Week 1</span>
+                            <span>Ground School</span>
+                            <span>0.0</span>
+                            <span>$0</span>
+                        </div>
+                    </div>
+                    <div class="logbook-totals">
+                        <span>Totals:</span>
+                        <span>-</span>
+                        <span id="total-hours">0.0 hrs</span>
+                        <span id="total-spent">$0</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Game Controls -->
+        <footer>
+            <div class="game-controls">
+                <button onclick="saveGame()">💾 Save Game</button>
+                <button onclick="loadGame()">📂 Load Game</button>
+                <button onclick="resetGame()">🔄 New Game</button>
+            </div>
+        </footer>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
