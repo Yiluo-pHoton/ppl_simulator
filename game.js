@@ -1386,16 +1386,8 @@ function updatePhase() {
         gameState.phase = 'Pre-Solo';
     }
     
-    // Update milestone achievements
-    if (gameState.phase === 'Pre-Solo' && !gameState.milestones.groundSchool) {
-        gameState.milestones.groundSchool = true;
-        showAchievement('Ground School Complete!');
-    }
-    
-    if (gameState.phase === 'Solo Training' && !gameState.milestones.firstSolo) {
-        gameState.milestones.firstSolo = true;
-        showAchievement('First Solo Flight!');
-    }
+    // Enhanced milestone achievement system with detailed celebrations
+    checkAndCelebrateMilestones();
     
     // Update milestone tracker
     updateMilestoneTracker();
@@ -1541,7 +1533,7 @@ function showCelebrationModal() {
     document.getElementById('celebration-message').textContent = personalMessage;
     
     // Show the modal
-    modal.style.display = 'flex';
+    modal.classList.add('active');
     
     // Disable action buttons
     document.querySelectorAll('.action-btn').forEach(btn => btn.disabled = true);
@@ -1549,78 +1541,394 @@ function showCelebrationModal() {
 
 function closeCelebration() {
     const modal = document.getElementById('celebration-modal');
-    modal.style.display = 'none';
+    modal.classList.remove('active');
 }
 
-// Game Over Modal Functions
+// DRAMATIC ENDING SYSTEM - 25+ Narrative Variations
+const endingNarratives = {
+    fatigue: [
+        {
+            title: "Wings Folded",
+            text: "The sky that once called to you now feels impossibly distant. Your logbook sits closed, its pages filled with dreams that grew too heavy for weary shoulders to carry. The runway lights blur as exhaustion claims what passion once fueled."
+        },
+        {
+            title: "Grounded by Gravity",
+            text: "Every pilot knows the weight of the earth pulling downward, but few feel it in their soul. The cockpit that once felt like home now seems foreign, and the horizon you chased has faded into gray uncertainty."
+        },
+        {
+            title: "Fuel Exhausted",
+            text: "Like an aircraft on empty tanks, your spirit has run dry. The engine of ambition sputters to silence, leaving only the whisper of wind through motionless wings and the echo of what might have been."
+        },
+        {
+            title: "Course Deviation",
+            text: "Navigation requires more than instruments—it needs the strength to continue when weather turns rough. Today, the storm proved stronger than your reserves, forcing an early landing on unfamiliar ground."
+        },
+        {
+            title: "Emergency Landing",
+            text: "Every pilot trains for emergencies, but some battles are fought in the heart rather than the sky. You've executed a perfect landing on the field of self-preservation, choosing safety over the uncertain heights ahead."
+        },
+        {
+            title: "Radio Silence",
+            text: "The tower calls, but your spirit no longer answers. In the quiet of an empty hangar, dreams settle like dust on unused wings, waiting for the day when the frequency clears and you're ready to respond again."
+        },
+        {
+            title: "Below Minimums",
+            text: "Weather has dropped below your personal minimums for continuing this flight. Like a wise pilot checking conditions before takeoff, you've recognized when it's time to remain grounded until clearer skies return."
+        }
+    ],
+    financial: [
+        {
+            title: "Fuel Price Spike",
+            text: "The dream of flight has a currency all its own, and today the market closed higher than your reserves could sustain. Like countless pilots before you, the economics of aviation have clipped wings that were meant to soar."
+        },
+        {
+            title: "Hangar Rent Due",
+            text: "Even the most skillful pilots must sometimes surrender to the mathematics of money. Your aircraft sits grounded not by mechanical failure, but by the harsh reality that dreams require more than desire—they need sustainable funding."
+        },
+        {
+            title: "Budget Overrun",
+            text: "The flight plan looked perfect on paper, but like so many aviation adventures, the actual costs exceeded the estimates. Your wallet, like an empty fuel tank, has forced an unscheduled landing on the runway of financial reality."
+        },
+        {
+            title: "Maintenance Costs",
+            text: "Aviation teaches expensive lessons, and today's curriculum exceeded your tuition budget. The aircraft of ambition requires more maintenance than your bank account can provide, grounding dreams until better-funded weather arrives."
+        },
+        {
+            title: "Insurance Lapse",
+            text: "Every pilot knows the importance of proper coverage, but sometimes life's expenses compete with aviation's demands. Without the safety net of adequate funding, even the most eager student must wait in the hangar of deferred dreams."
+        },
+        {
+            title: "Loan Denied",
+            text: "The bank's decision falls like turbulence on clear-sky plans. Your application for aviation funding has been denied, leaving dreams temporarily grounded while you rebuild the financial foundation needed for sustained flight."
+        },
+        {
+            title: "Equipment Costs",
+            text: "Headsets, charts, and training materials—the hidden costs of learning to fly accumulate like ice on wings. Today, the weight of these expenses has exceeded your aircraft's financial payload capacity."
+        }
+    ],
+    safety: [
+        {
+            title: "No-Go Decision",
+            text: "The mark of a true aviator is knowing when not to fly. Today, your inner weather radar detected conditions beyond your current capabilities. This isn't failure—it's the wisdom that separates skilled pilots from cautionary tales."
+        },
+        {
+            title: "Abort Takeoff",
+            text: "Speed builds down the runway of ambition, but something feels wrong. Like a pilot aborting takeoff when engine parameters aren't right, you've chosen safety over the pressure to continue into uncertain skies."
+        },
+        {
+            title: "Pattern Work Required",
+            text: "Some skills need more time in the pattern before attempting solo flight. Your instructor's voice echoes through the radio of self-awareness: 'More practice needed before this bird is ready to fly alone.'"
+        },
+        {
+            title: "Medical Grounding",
+            text: "The FAA medical examiner of life has identified conditions that require attention before returning to flight status. Like many pilots, you must address these concerns before your certificate to fly can be renewed."
+        },
+        {
+            title: "Weather Below Minimums",
+            text: "Even instrument-rated dreams have weather minimums. Today's conditions—ceiling too low, visibility poor—have dropped below what your current experience level can safely handle. The wise pilot waits for better weather."
+        },
+        {
+            title: "Equipment Malfunction",
+            text: "Your personal aircraft has developed systems issues that ground student pilots. Unlike mechanical problems that mechanics can fix, these require the specialized maintenance only time and self-care can provide."
+        },
+        {
+            title: "Instructor Recommendation",
+            text: "Your CFI has made the difficult but caring decision that more preparation is needed before soloing. This temporary setback protects both your safety and your future aviation career—a mark of professional instruction."
+        }
+    ],
+    timeLimit: [
+        {
+            title: "Certificate Expired",
+            text: "Like medical certificates and flight reviews, dreams have expiration dates. Time has run out on this attempt, but aviation is full of renewal opportunities. The knowledge gained never expires—only the temporary authorization to continue this particular flight."
+        },
+        {
+            title: "Sunset Landing",
+            text: "Every flight has day/night limitations for student pilots. As the sun sets on this training attempt, remember that tomorrow brings new daylight hours and fresh opportunities to return to the pattern of learning."
+        },
+        {
+            title: "Clock Running Out",
+            text: "The Hobbs meter of life has logged more hours than your training budget allowed. Like aircraft rental by the hour, dreams sometimes exceed their booked time slot, requiring a return to base for refueling and rescheduling."
+        },
+        {
+            title: "Duty Time Exceeded",
+            text: "Even airline pilots have duty time limitations. Your personal flight time requirements have exceeded safe parameters for continued operation, mandating a required rest period before returning to service."
+        },
+        {
+            title: "Seasonal Grounding",
+            text: "Some aircraft are grounded during harsh seasons for maintenance and preparation. Your aviation dreams enter their winter hangar today, but spring always returns with longer days and better flying weather."
+        },
+        {
+            title: "Training Window Closed",
+            text: "Weather windows for flight training don't stay open indefinitely. Conditions that seemed perfect for learning have shifted, requiring patience until the next favorable period opens for student operations."
+        },
+        {
+            title: "Final Approach",
+            text: "This training flight has reached its final approach phase. Like all flights, it must eventually touch down, but every landing is simply preparation for the next takeoff when conditions and resources align again."
+        }
+    ]
+};
+
+// Dramatic Game Over Modal Functions
 function showGameOverModal(endingType, message) {
-    const modal = document.getElementById('gameover-modal');
-    const title = document.getElementById('gameover-title');
-    const subtitle = document.getElementById('gameover-subtitle');
-    const icon = document.getElementById('gameover-icon');
-    const messageElement = document.getElementById('gameover-message');
-    const reason = document.getElementById('gameover-reason');
+    // Map legacy ending types to new narrative types
+    const endingTypeMap = {
+        'exhausted': 'fatigue',
+        'bankrupt': 'financial',
+        'safety': 'safety',
+        'timeout': 'timeLimit',
+        'timeLimit': 'timeLimit'
+    };
     
-    // Set content based on ending type
-    const endingData = getEndingData(endingType);
-    title.textContent = 'GAME OVER';
-    subtitle.textContent = endingData.title;
-    icon.textContent = endingData.icon;
-    messageElement.textContent = message;
-    reason.textContent = endingData.reason;
+    const mappedType = endingTypeMap[endingType] || 'fatigue';
+    console.log(`[DEBUG] Game ending triggered: ${endingType} -> ${mappedType}`);
     
-    // Update stats
-    document.getElementById('gameover-days').textContent = gameState.day;
-    document.getElementById('gameover-hours').textContent = gameState.stats.flightHours.toFixed(1);
-    document.getElementById('gameover-spent').textContent = `$${gameState.totalSpent.toLocaleString()}`;
-    document.getElementById('gameover-progress').textContent = `${gameState.stats.progress}%`;
-    
-    // Check if save exists for load button
-    const loadBtn = document.getElementById('load-game-btn');
-    const hasSave = localStorage.getItem('ppl_simulator_save');
-    loadBtn.style.display = hasSave ? 'block' : 'none';
-    
-    // Show modal
-    modal.style.display = 'flex';
+    showDramaticEnding(mappedType);
 }
 
+function showDramaticEnding(endingType) {
+    try {
+        const modal = document.getElementById('gameover-modal');
+        const title = document.getElementById('dramatic-title');
+        const narrativeText = document.getElementById('narrative-text');
+        const epilogueText = document.getElementById('epilogue-text');
+        
+        // Validate required DOM elements exist
+        if (!modal || !title || !narrativeText || !epilogueText) {
+            console.error('[ERROR] Required DOM elements missing for dramatic ending');
+            console.error('Modal:', modal, 'Title:', title, 'Narrative:', narrativeText, 'Epilogue:', epilogueText);
+            
+            // Fallback to alert if modal system fails
+            alert(`Game Over: ${endingType}\n\nYour training has ended. Please refresh the page to try again.`);
+            return;
+        }
+        
+        // Select random narrative for this ending type
+        const narratives = endingNarratives[endingType] || endingNarratives.fatigue;
+        const selectedNarrative = narratives[Math.floor(Math.random() * narratives.length)];
+        
+        console.log(`[DEBUG] Selected narrative: ${selectedNarrative.title}`);
+        
+        // Set title
+        title.textContent = selectedNarrative.title;
+        
+        // Update journey stats with error handling
+        const updateStat = (elementId, value) => {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value;
+            } else {
+                console.warn(`[WARNING] Element not found: ${elementId}`);
+            }
+        };
+        
+        updateStat('journey-days', gameState.day);
+        updateStat('journey-hours', gameState.stats.flightHours.toFixed(1));
+        updateStat('journey-spent', `$${gameState.totalSpent.toLocaleString()}`);
+        updateStat('journey-progress', `${gameState.stats.progress}%`);
+        
+        // Generate encouraging epilogue
+        const epilogue = generateEpilogue(endingType);
+        epilogueText.textContent = epilogue;
+        
+        // Check if save exists for load button
+        const loadBtn = document.getElementById('load-dramatic-btn');
+        const hasSave = localStorage.getItem('ppl_simulator_save');
+        if (loadBtn) {
+            loadBtn.style.display = hasSave ? 'block' : 'none';
+        }
+        
+        // Show modal - ensure it's visible
+        modal.style.display = 'flex';  // Force display first
+        modal.classList.add('active');  // Then add active class
+        console.log('[DEBUG] Modal activated - display:', modal.style.display, 'classes:', modal.className);
+        
+        // Start typewriter effect for narrative
+        typewriterEffect(narrativeText, selectedNarrative.text, 30);
+        
+    } catch (error) {
+        console.error('[CRITICAL] Failed to show dramatic ending:', error);
+        // Emergency fallback
+        alert(`Game Over!\n\nYour training has ended due to: ${endingType}\n\nRefresh the page to start a new game.`);
+    }
+}
+
+function closeDramaticEnding() {
+    const modal = document.getElementById('gameover-modal');
+    modal.classList.remove('active');
+}
+
+// Alias for backwards compatibility
 function closeGameOver() {
-    const modal = document.getElementById('gameover-modal');
-    modal.style.display = 'none';
+    closeDramaticEnding();
 }
 
-function getEndingData(endingType) {
+// Typewriter effect for dramatic text reveal
+function typewriterEffect(element, text, speed = 30) {
+    element.textContent = '';
+    element.style.opacity = '1';
+    let i = 0;
+    
+    function typeChar() {
+        if (i < text.length) {
+            element.textContent += text.charAt(i);
+            i++;
+            setTimeout(typeChar, speed);
+        }
+    }
+    
+    setTimeout(typeChar, 500); // Start after a short delay
+}
+
+// Generate encouraging epilogue based on ending type
+function generateEpilogue(endingType) {
+    const epilogues = {
+        fatigue: [
+            "Every accomplished pilot has faced moments of exhaustion. Rest well—the sky will be waiting when you're ready to return.",
+            "The strongest wings are those that know when to fold and when to spread. Your aviation journey is paused, not ended.",
+            "Fatigue is temporary, but the dream of flight is eternal. Take time to recharge—great pilots always fly another day."
+        ],
+        financial: [
+            "Aviation has always been expensive, but resourceful pilots find ways to make it work. This pause creates opportunity for better planning.",
+            "Many legendary aviators started with empty pockets but full hearts. Your financial situation is temporary—your passion is permanent.",
+            "Smart pilots know when to invest and when to conserve. This break allows you to return with a stronger financial foundation."
+        ],
+        safety: [
+            "The safest pilots are those who respect their limitations. Today's caution is tomorrow's continued flying.",
+            "Aviation safety is built on countless good decisions. Your choice to pause reflects the judgment of a future professional pilot.",
+            "Every experienced aviator has stories of times they chose safety over schedule. This wisdom will serve you well throughout your flying career."
+        ],
+        timeLimit: [
+            "Timing in aviation is everything. This pause in your training creates space for the perfect conditions to align.",
+            "Like weather windows, training opportunities come and go. The patient pilot catches the next favorable period.",
+            "Every master pilot has faced scheduling challenges. Your dedication to return when the time is right shows true aviation spirit."
+        ]
+    };
+    
+    const options = epilogues[endingType] || epilogues.fatigue;
+    return options[Math.floor(Math.random() * options.length)];
+}
+
+// Generate encouraging progress summary for game over screen
+function generateProgressSummary() {
+    const stats = gameState.stats;
+    const milestones = [];
+    
+    if (gameState.milestones.groundSchool) milestones.push('📚 Ground School Complete');
+    if (gameState.milestones.preSolo) milestones.push('✈️ Pre-Solo Eligible');
+    if (gameState.milestones.firstSolo) milestones.push('🎉 Solo Flight Achieved');
+    if (gameState.milestones.crossCountry) milestones.push('🗺️ Cross-Country Ready');
+    if (gameState.milestones.writtenTest) milestones.push('📝 Written Test Passed');
+    
+    let summary = '<div class="progress-achievements"><h4>Your Aviation Journey So Far:</h4>';
+    
+    if (milestones.length > 0) {
+        summary += '<div class="achievements-list">';
+        milestones.forEach(milestone => {
+            summary += `<div class="achievement-item">${milestone}</div>`;
+        });
+        summary += '</div>';
+    } else {
+        summary += '<p>Every pilot starts somewhere, and you\'ve taken the first step!</p>';
+    }
+    
+    // Add encouraging message based on progress
+    if (stats.flightHours >= 30) {
+        summary += '<p class="encouragement">You\'ve built significant flight experience. Your aviation foundation is solid!</p>';
+    } else if (stats.flightHours >= 15) {
+        summary += '<p class="encouragement">You\'ve logged meaningful flight time. Many pilots face setbacks during training.</p>';
+    } else if (stats.flightHours >= 5) {
+        summary += '<p class="encouragement">You\'ve started your flight training journey. Every hour in the cockpit teaches valuable lessons.</p>';
+    } else {
+        summary += '<p class="encouragement">You\'ve begun the incredible journey of flight training. This experience will make you a better pilot.</p>';
+    }
+    
+    summary += '</div>';
+    return summary;
+}
+
+// Update milestone display in game over modal
+function updateGameOverMilestones() {
+    const container = document.getElementById('gameover-milestones');
+    if (!container) return;
+    
+    const milestonesData = [
+        { key: 'groundSchool', name: 'Ground School', icon: '📚' },
+        { key: 'preSolo', name: 'Pre-Solo', icon: '✈️' },
+        { key: 'firstSolo', name: 'Solo Flight', icon: '🎉' },
+        { key: 'crossCountry', name: 'Cross-Country', icon: '🗺️' },
+        { key: 'writtenTest', name: 'Written Test', icon: '📝' },
+        { key: 'checkride', name: 'Checkride', icon: '🏆' }
+    ];
+    
+    let html = '';
+    milestonesData.forEach(milestone => {
+        const achieved = gameState.milestones[milestone.key];
+        const status = achieved ? 'achieved' : 'not-achieved';
+        html += `<div class="milestone-status ${status}">
+            <span class="milestone-icon">${milestone.icon}</span>
+            <span class="milestone-name">${milestone.name}</span>
+            <span class="milestone-check">${achieved ? '✓' : '✗'}</span>
+        </div>`;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Enhanced ending data with detailed explanations and context
+function getDetailedEndingData(endingType) {
     const endings = {
         exhausted: {
-            title: 'Exhaustion Grounding',
+            title: 'TRAINING SUSPENDED',
+            subtitle: 'Exhaustion Grounding',
             icon: '😴',
-            reason: 'Fatigue reached dangerous levels - you cannot safely continue training.'
+            explanation: 'Your training has been suspended due to dangerous fatigue levels. In aviation, fatigue is a serious safety concern that can impair judgment, reaction time, and decision-making skills.',
+            context: 'Professional pilots are required to ground themselves when too tired to fly safely. This is exactly the right decision - aviation safety always comes first. Rest up and you can return to training when refreshed.'
         },
         broke: {
-            title: 'Financial Grounding', 
+            title: 'FINANCIALLY GROUNDED',
+            subtitle: 'Insufficient Training Funds',
             icon: '💸',
-            reason: 'Insufficient funds to continue training. Budget management is crucial for pilot training.'
+            explanation: 'You\'ve run out of money before completing your PPL training. Flight training is expensive, and many student pilots face financial challenges during their journey.',
+            context: 'This is more common than you might think. Many successful pilots had to pause training to save more money, take on additional work, or find creative financing solutions. Your progress isn\'t lost - when you\'re ready to return, you\'ll pick up where you left off.'
         },
         burnout: {
-            title: 'Motivation Failure',
-            icon: '😞', 
-            reason: 'Morale dropped to zero - the mental aspect of flying is as important as the technical skills.'
+            title: 'MOTIVATION LOST',
+            subtitle: 'Training Burnout',
+            icon: '😞',
+            explanation: 'Your motivation has dropped to critically low levels, making it impossible to continue effective training. Flying should be enjoyable and engaging - when it becomes a burden, it\'s time to step back.',
+            context: 'Burnout affects many student pilots, especially during challenging phases of training. Taking a break, finding a new instructor, or changing your approach can often reignite your passion for aviation. This setback doesn\'t define your potential as a pilot.'
         },
         safety: {
-            title: 'Safety Violation',
+            title: 'SAFETY GROUNDING',
+            subtitle: 'Training Standards Violation',
             icon: '⚠️',
-            reason: 'Safety standards fell too low. Your CFI has grounded you for additional training.'
+            explanation: 'Your Certified Flight Instructor has grounded you due to safety concerns. This decision protects both you and others in the aviation community.',
+            context: 'Safety groundings, while disappointing, are actually a sign of good instruction. Your CFI is prioritizing safety over schedule - exactly what professional aviation demands. Additional ground study, practice, or a fresh perspective can help you return to safe flying standards.'
         },
         timeout: {
-            title: 'Training Expired',
+            title: 'TRAINING EXPIRED',
+            subtitle: 'Time Limit Exceeded',
             icon: '⏰',
-            reason: 'Training took too long and momentum was lost. Consistency is key in aviation.'
+            explanation: 'Your training has exceeded reasonable time limits. Prolonged training can lead to skill degradation, knowledge gaps, and increased costs.',
+            context: 'While there\'s no legal time limit for PPL training, most successful students complete within 6-18 months. Extended training often indicates the need for more intensive study, more frequent lessons, or addressing underlying challenges. Consider a focused training restart.'
         }
     };
     return endings[endingType] || {
-        title: 'Training Terminated',
+        title: 'TRAINING ENDED',
+        subtitle: 'Flight Training Terminated',
         icon: '✈️',
-        reason: 'Training has ended.'
+        explanation: 'Your training has ended unexpectedly.',
+        context: 'Every pilot\'s journey is unique, with its own challenges and opportunities.'
+    };
+}
+
+// Legacy function for backwards compatibility
+function getEndingData(endingType) {
+    const detailed = getDetailedEndingData(endingType);
+    return {
+        title: detailed.subtitle,
+        icon: detailed.icon,
+        reason: detailed.explanation
     };
 }
 
@@ -1693,6 +2001,105 @@ function showFatigueAlert(title, message, type) {
     }, 5000);
 }
 
+// Comprehensive Warning System
+let lastWarnings = {
+    money: 0,
+    morale: 0,
+    safety: 0,
+    fatigue: 0
+};
+
+function checkAllWarnings() {
+    const stats = gameState.stats;
+    
+    // Check fatigue warnings
+    checkFatigueWarnings(stats.fatigue);
+    
+    // Check money warnings
+    checkMoneyWarnings(stats.money);
+    
+    // Check morale warnings
+    checkMoraleWarnings(stats.morale);
+    
+    // Check safety warnings  
+    checkSafetyWarnings(stats.safety, stats.flightHours);
+}
+
+function checkMoneyWarnings(money) {
+    if (money <= 500 && lastWarnings.money < 500) {
+        showAchievement('CRITICAL: Very low funds! Training may end soon if you run out of money.', 'critical');
+        lastWarnings.money = 500;
+    } else if (money <= 1000 && lastWarnings.money < 1000) {
+        showAchievement('LOW FUNDS WARNING: Consider managing expenses carefully to complete training.', 'warning');
+        lastWarnings.money = 1000;
+    } else if (money > 1000) {
+        lastWarnings.money = 0;
+    }
+}
+
+function checkMoraleWarnings(morale) {
+    if (morale <= 10 && lastWarnings.morale < 10) {
+        showAchievement('CRITICAL MORALE: You\'re losing motivation! Consider taking a break or changing your approach.', 'critical');
+        lastWarnings.morale = 10;
+    } else if (morale <= 30 && lastWarnings.morale < 30) {
+        showAchievement('LOW MORALE: Flying should be enjoyable. Consider rest or celebrating small wins.', 'warning');
+        lastWarnings.morale = 30;
+    } else if (morale > 30) {
+        lastWarnings.morale = 0;
+    }
+}
+
+function checkSafetyWarnings(safety, hours) {
+    // Safety becomes more critical as hours increase
+    const criticalThreshold = hours > 10 ? 40 : 30;
+    const warningThreshold = hours > 10 ? 55 : 45;
+    
+    if (safety <= criticalThreshold && lastWarnings.safety < criticalThreshold) {
+        showAchievement('SAFETY CRITICAL: Your CFI may ground you if safety doesn\'t improve soon!', 'critical');
+        lastWarnings.safety = criticalThreshold;
+    } else if (safety <= warningThreshold && lastWarnings.safety < warningThreshold) {
+        showAchievement('SAFETY WARNING: Focus on procedures and safety habits during training.', 'warning');
+        lastWarnings.safety = warningThreshold;
+    } else if (safety > warningThreshold) {
+        lastWarnings.safety = 0;
+    }
+}
+
+// Check and celebrate newly achieved milestones
+function checkAndCelebrateMilestones() {
+    const stats = gameState.stats;
+    
+    // Initialize missing milestone properties if needed
+    if (!gameState.milestones.preSolo) gameState.milestones.preSolo = false;
+    if (!gameState.milestones.crossCountry) gameState.milestones.crossCountry = false;
+    
+    // Check each milestone for new achievements
+    if (!gameState.milestones.groundSchool && stats.knowledge >= 60) {
+        gameState.milestones.groundSchool = true;
+        celebrateMilestone('groundSchool');
+    }
+    
+    if (!gameState.milestones.preSolo && stats.flightHours >= 15 && stats.safety >= 70) {
+        gameState.milestones.preSolo = true;
+        celebrateMilestone('preSolo');
+    }
+    
+    if (!gameState.milestones.firstSolo && stats.flightHours >= 25 && stats.morale >= 75 && stats.knowledge >= 75 && stats.safety >= 75) {
+        gameState.milestones.firstSolo = true;
+        celebrateMilestone('firstSolo');
+    }
+    
+    if (!gameState.milestones.crossCountry && stats.flightHours >= 35 && stats.knowledge >= 80) {
+        gameState.milestones.crossCountry = true;
+        celebrateMilestone('crossCountry');
+    }
+    
+    if (!gameState.milestones.checkride && stats.flightHours >= 40 && stats.morale >= 80 && stats.knowledge >= 80 && stats.safety >= 80) {
+        gameState.milestones.checkride = true;
+        celebrateMilestone('checkride');
+    }
+}
+
 // Add CSS animations for fatigue alerts dynamically
 if (!document.getElementById('fatigue-alert-styles')) {
     const style = document.createElement('style');
@@ -1759,28 +2166,159 @@ function checkTutorial() {
     }
 }
 
-// Show achievement popup
-function showAchievement(text) {
-    // Simple achievement notification - could be enhanced with animations
+// Enhanced Achievement System with Milestone Celebrations
+function showAchievement(text, type = 'milestone') {
     const achievement = document.createElement('div');
+    achievement.className = `achievement-popup ${type}`;
+    
+    const iconMap = {
+        milestone: '🎯',
+        warning: '⚠️',
+        critical: '🚨',
+        success: '✅',
+        celebration: '🎉'
+    };
+    
+    achievement.innerHTML = `
+        <div class="achievement-icon">${iconMap[type] || '🎯'}</div>
+        <div class="achievement-text">${text}</div>
+        <div class="achievement-close" onclick="this.parentElement.remove()">×</div>
+    `;
+    
     achievement.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
-        background: var(--success-green);
+        background: ${type === 'warning' ? '#f39c12' : type === 'critical' ? '#e74c3c' : 'var(--success-green)'};
         color: white;
-        padding: 1rem 2rem;
-        border-radius: 8px;
+        padding: 15px 20px;
+        border-radius: 12px;
         font-weight: bold;
         z-index: 1000;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        max-width: 300px;
+        animation: slideInRight 0.5s ease-out;
     `;
-    achievement.textContent = text;
+    
     document.body.appendChild(achievement);
     
+    // Auto-remove after delay (longer for critical messages)
+    const delay = type === 'critical' ? 8000 : type === 'warning' ? 5000 : 4000;
     setTimeout(() => {
-        achievement.remove();
-    }, 3000);
+        if (achievement.parentElement) {
+            achievement.style.animation = 'slideOutRight 0.3s ease-in';
+            setTimeout(() => achievement.remove(), 300);
+        }
+    }, delay);
+}
+
+// Comprehensive Milestone Celebration System
+function celebrateMilestone(milestone) {
+    const milestoneData = {
+        groundSchool: {
+            title: '📚 Ground School Complete!',
+            message: 'You\'ve mastered the fundamentals! Time to take your knowledge to the skies.',
+            icon: '🎓',
+            nextStep: 'Next: Build 15+ flight hours for pre-solo training'
+        },
+        preSolo: {
+            title: '✈️ Pre-Solo Eligible!', 
+            message: 'Your skills are developing well. Solo flight is within reach!',
+            icon: '🛩️',
+            nextStep: 'Next: Demonstrate consistent safety for solo endorsement'
+        },
+        firstSolo: {
+            title: '🎉 First Solo Flight!',
+            message: 'Congratulations! You\'ve achieved every pilot\'s dream - flying solo!',
+            icon: '👨‍✈️',
+            nextStep: 'Next: Build cross-country navigation skills'
+        },
+        crossCountry: {
+            title: '🗺️ Cross-Country Ready!',
+            message: 'You can now navigate to distant airports. The world is opening up!',
+            icon: '🌍',
+            nextStep: 'Next: Prepare for your written exam'
+        },
+        writtenTest: {
+            title: '📝 Written Test Passed!',
+            message: 'Knowledge test complete! You\'re ready for the practical exam.',
+            icon: '✅',
+            nextStep: 'Next: Schedule your checkride when ready'
+        },
+        checkride: {
+            title: '🏆 PPL Earned!',
+            message: 'Welcome to the community of certificated pilots!',
+            icon: '👨‍✈️',
+            nextStep: 'The sky is no longer the limit!'
+        }
+    };
+    
+    const data = milestoneData[milestone];
+    if (!data) return;
+    
+    // Show detailed milestone notification
+    showDetailedMilestone(data.title, data.message, data.icon, data.nextStep);
+    
+    // Animate milestone tracker
+    const milestoneEl = document.getElementById(`milestone-${milestone}`);
+    if (milestoneEl) {
+        milestoneEl.classList.add('milestone-celebration');
+        setTimeout(() => {
+            milestoneEl.classList.remove('milestone-celebration');
+        }, 3000);
+    }
+}
+
+function showDetailedMilestone(title, message, icon, nextStep) {
+    const modal = document.createElement('div');
+    modal.className = 'milestone-modal-overlay';
+    
+    modal.innerHTML = `
+        <div class="milestone-modal">
+            <div class="milestone-header">
+                <div class="milestone-icon-large">${icon}</div>
+                <h2 class="milestone-title">${title}</h2>
+                <p class="milestone-message">${message}</p>
+            </div>
+            <div class="milestone-content">
+                <div class="milestone-next-step">
+                    <strong>What's Next:</strong> ${nextStep}
+                </div>
+                <div class="milestone-progress-summary">
+                    <div>Flight Hours: <strong>${gameState.stats.flightHours.toFixed(1)}</strong></div>
+                    <div>Days Training: <strong>${gameState.day}</strong></div>
+                    <div>Money Spent: <strong>$${gameState.totalSpent.toLocaleString()}</strong></div>
+                </div>
+            </div>
+            <button class="milestone-continue-btn" onclick="this.parentElement.parentElement.remove()">Continue Training</button>
+        </div>
+    `;
+    
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        animation: fadeIn 0.3s ease-out;
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Auto-close after 10 seconds if not manually closed
+    setTimeout(() => {
+        if (modal.parentElement) {
+            modal.remove();
+        }
+    }, 10000);
 }
 
 // Update all display elements
@@ -2210,7 +2748,9 @@ function resetGame() {
             },
             milestones: {
                 groundSchool: false,
+                preSolo: false,
                 firstSolo: false,
+                crossCountry: false,
                 writtenTest: false,
                 checkride: false
             },
@@ -2582,23 +3122,34 @@ function updateActionButtons() {
             // Create preview effects text
             const effects = action.effects;
             const previewHTML = Object.keys(effects).map(stat => {
-                // Calculate average for cleaner display
-                const average = Math.round((effects[stat][0] + effects[stat][1]) / 2);
+                // Calculate average for cleaner display - handle both arrays and single values
+                let average;
+                if (Array.isArray(effects[stat])) {
+                    if (stat === 'hours') {
+                        // For hours, show average to 1 decimal place
+                        average = (effects[stat][0] + effects[stat][1]) / 2;
+                    } else {
+                        // For other stats, round to integer
+                        average = Math.round((effects[stat][0] + effects[stat][1]) / 2);
+                    }
+                } else {
+                    average = effects[stat];
+                }
             
-            if (stat === 'money' && average > 0) {
-                return `<span class="preview-stat ${stat}">$ +$${average}</span>`;
-            } else if (stat === 'money') {
-                return `<span class="preview-stat ${stat}">$ -$${Math.abs(average)}</span>`;
-            } else if (stat === 'hours') {
-                return `<span class="preview-stat ${stat}">HRS +${average.toFixed(1)}</span>`;
-            } else if (stat === 'fatigue') {
-                const sign = average >= 0 ? '+' : '';
-                return `<span class="preview-stat ${stat}">FTG ${sign}${average}</span>`;
-            } else {
-                const sign = average >= 0 ? '+' : '';
-                return `<span class="preview-stat ${stat}">${stat.toUpperCase().substring(0,3)} ${sign}${average}</span>`;
-            }
-        }).join(' ');
+                if (stat === 'money' && average > 0) {
+                    return `<span class="preview-stat ${stat}">+$${average}</span>`;
+                } else if (stat === 'money') {
+                    return `<span class="preview-stat ${stat}">-$${Math.abs(average)}</span>`;
+                } else if (stat === 'hours') {
+                    return `<span class="preview-stat ${stat}">HRS +${average.toFixed(1)}</span>`;
+                } else if (stat === 'fatigue') {
+                    const sign = average >= 0 ? '+' : '';
+                    return `<span class="preview-stat ${stat}">FTG ${sign}${average}</span>`;
+                } else {
+                    const sign = average >= 0 ? '+' : '';
+                    return `<span class="preview-stat ${stat}">${stat.toUpperCase().substring(0,3)} ${sign}${average}</span>`;
+                }
+            }).join(' ');
         
         button.innerHTML = `
             <span class="btn-icon">${action.icon}</span>
@@ -2634,9 +3185,11 @@ function updateStaticButton(button, actionType) {
             break;
             
         case 'fly':
-            available = stats.money >= 200 && weather.flyingFactor > 0; // Can afford and weather allows
-            description = available ? 'Book lesson ($250)' : (stats.money < 200 ? 'Need $200+' : 'Weather too bad');
-            cost = 250;
+            // Use realistic cost calculation instead of hardcoded $250
+            const lessonCost = calculateLessonCost();
+            cost = lessonCost.cost;
+            available = stats.money >= cost && weather.flyingFactor > 0; // Can afford and weather allows
+            description = available ? `Book lesson ($${cost})` : (stats.money < cost ? `Need $${cost}` : 'Weather too bad');
             break;
             
         case 'rest':
@@ -2660,6 +3213,55 @@ function updateStaticButton(button, actionType) {
     if (descriptionElement) {
         descriptionElement.textContent = description;
     }
+    
+    // Update preview stats with clear single values
+    const previewElement = button.querySelector('.btn-preview');
+    if (previewElement) {
+        updateButtonPreview(previewElement, actionType, cost);
+    }
+}
+
+// Helper function to update button preview with clean single values
+function updateButtonPreview(previewElement, actionType, cost) {
+    if (!previewElement) return;
+    
+    // Define action effects (same as fallback actions)
+    const actionEffects = {
+        study: { knowledge: [12, 18], morale: [-3, -7], safety: [3, 6] },
+        fly: { hours: [1.3, 1.7], knowledge: [6, 12], morale: [8, 15], money: typeof cost === 'number' && !isNaN(cost) ? -cost : -250 },
+        rest: { morale: [15, 25], safety: [5, 10], knowledge: [-2, -5] }
+    };
+    
+    const effects = actionEffects[actionType];
+    if (!effects) return;
+    
+    // Generate preview HTML with single average values
+    const previewHTML = Object.keys(effects).map(stat => {
+        let value;
+        if (Array.isArray(effects[stat])) {
+            // Calculate average for range
+            value = Math.round((effects[stat][0] + effects[stat][1]) / 2);
+        } else {
+            // Single value (like money cost)
+            value = effects[stat];
+        }
+        
+        if (stat === 'money' && value > 0) {
+            return `<span class="preview-stat ${stat}">+$${value}</span>`;
+        } else if (stat === 'money') {
+            return `<span class="preview-stat ${stat}">-$${Math.abs(value)}</span>`;
+        } else if (stat === 'hours') {
+            return `<span class="preview-stat ${stat}">HRS +${value.toFixed ? value.toFixed(1) : value}</span>`;
+        } else if (stat === 'fatigue') {
+            const sign = value >= 0 ? '+' : '';
+            return `<span class="preview-stat ${stat}">FTG ${sign}${value}</span>`;
+        } else {
+            const sign = value >= 0 ? '+' : '';
+            return `<span class="preview-stat ${stat}">${stat.toUpperCase().substring(0,3)} ${sign}${value}</span>`;
+        }
+    }).join(' ');
+    
+    previewElement.innerHTML = previewHTML;
 }
 
 // Handle dynamic actions
@@ -3094,8 +3696,39 @@ updateDisplay = function() {
     updateAccessibilityValues();
 };
 
+// Verify critical DOM elements exist
+function verifyModalElements() {
+    const requiredElements = [
+        'gameover-modal',
+        'dramatic-title', 
+        'narrative-text',
+        'epilogue-text',
+        'journey-days',
+        'journey-hours', 
+        'journey-spent',
+        'journey-progress'
+    ];
+    
+    const missingElements = [];
+    requiredElements.forEach(id => {
+        if (!document.getElementById(id)) {
+            missingElements.push(id);
+        }
+    });
+    
+    if (missingElements.length > 0) {
+        console.error('[CRITICAL] Missing required DOM elements:', missingElements);
+        console.error('The dramatic ending system may not function properly.');
+        return false;
+    } else {
+        console.log('[INFO] All modal elements verified successfully');
+        return true;
+    }
+}
+
 // Initialize game when page loads
 document.addEventListener('DOMContentLoaded', () => {
     initGame();
     initKeyboardNavigation();
+    verifyModalElements(); // Verify all modal elements exist
 });

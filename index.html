@@ -4,69 +4,479 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Private Pilot License Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Dancing+Script:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🛩️ PPL Simulator</h1>
+            <h1>PPL Simulator</h1>
             <div class="progress-info">
-                <span id="week-counter">Week 1</span>
+                <span id="week-counter">Day 1</span>
                 <span id="phase-indicator">Ground School</span>
+            </div>
+            
+            <!-- Milestone Progress Tracker -->
+            <div class="milestone-tracker">
+                <div class="milestone-item" id="milestone-ground" data-status="current">
+                    <div class="milestone-icon">GND</div>
+                    <div class="milestone-label">Ground School</div>
+                    <div class="milestone-req">Knowledge: 60%</div>
+                </div>
+                <div class="milestone-connector"></div>
+                <div class="milestone-item" id="milestone-presolo" data-status="locked">
+                    <div class="milestone-icon">PRE</div>
+                    <div class="milestone-label">Pre-Solo</div>
+                    <div class="milestone-req">15+ hrs, Safety: 70%</div>
+                </div>
+                <div class="milestone-connector"></div>
+                <div class="milestone-item" id="milestone-solo" data-status="locked">
+                    <div class="milestone-icon">SOLO</div>
+                    <div class="milestone-label">Solo Flight</div>
+                    <div class="milestone-req">25+ hrs, All: 75%</div>
+                </div>
+                <div class="milestone-connector"></div>
+                <div class="milestone-item" id="milestone-cross" data-status="locked">
+                    <div class="milestone-icon">XC</div>
+                    <div class="milestone-label">Cross-Country</div>
+                    <div class="milestone-req">35+ hrs, Knowledge: 80%</div>
+                </div>
+                <div class="milestone-connector"></div>
+                <div class="milestone-item" id="milestone-checkride" data-status="locked">
+                    <div class="milestone-icon">CHK</div>
+                    <div class="milestone-label">Checkride</div>
+                    <div class="milestone-req">40+ hrs, All: 80%</div>
+                </div>
             </div>
         </header>
 
-        <main>
-            <!-- Player Stats Panel -->
-            <section class="stats-panel">
-                <h2>Flight Instruments</h2>
-                <div class="instruments-grid">
-                    <div class="gauge" id="morale-gauge">
-                        <div class="gauge-label">Morale</div>
-                        <div class="gauge-value" id="morale-value">75%</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="morale-bar"></div>
+        <main role="main">
+            <!-- Player Stats Panel - Aircraft Instruments -->
+            <section class="stats-panel" role="region" aria-labelledby="instruments-heading">
+                <h2 id="instruments-heading">Flight Instruments</h2>
+                <div class="instrument-panel" role="group" aria-label="Aircraft Instrument Panel">
+                    <!-- Primary Flight Instruments Group -->
+                    <div class="instrument-group primary-group" role="group" aria-label="Primary Flight Instruments">
+                        <!-- Morale - Altimeter Style -->
+                        <div class="instrument" id="morale-instrument" role="progressbar" aria-label="Morale Level" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" tabindex="0">
+                        <div class="instrument-bezel">
+                            <svg class="gauge-svg" viewBox="0 0 200 200">
+                                <!-- Outer Ring -->
+                                <circle cx="100" cy="100" r="95" fill="#2C2C2C" stroke="#1a1a1a" stroke-width="3"/>
+                                <circle cx="100" cy="100" r="85" fill="#F5F5DC" stroke="#888" stroke-width="1"/>
+                                
+                                <!-- Scale Marks - 6 point system aligned with labels -->
+                                <g class="scale-marks">
+                                    <!-- Major marks every 60 degrees (6 total) -->
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(0 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(60 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(120 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(180 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(240 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(300 100 100)"/>
+                                    
+                                    <!-- Minor marks every 30 degrees -->
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(30 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(90 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(150 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(210 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(270 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(330 100 100)"/>
+                                </g>
+                                
+                                <!-- Scale Numbers - positioned to align with tick marks -->
+                                <text x="100" y="32" text-anchor="middle" fill="#000" font-size="12" font-weight="bold">100</text>
+                                <text x="143" y="50" text-anchor="middle" fill="#000" font-size="12" font-weight="bold">80</text>
+                                <text x="143" y="160" text-anchor="middle" fill="#000" font-size="12" font-weight="bold">60</text>
+                                <text x="100" y="178" text-anchor="middle" fill="#000" font-size="12" font-weight="bold">40</text>
+                                <text x="57" y="160" text-anchor="middle" fill="#000" font-size="12" font-weight="bold">20</text>
+                                <text x="57" y="50" text-anchor="middle" fill="#000" font-size="12" font-weight="bold">0</text>
+                                
+                                <!-- Needle -->
+                                <line id="morale-needle" x1="100" y1="100" x2="100" y2="40" stroke="#FF4444" stroke-width="3" stroke-linecap="round" transform="rotate(270 100 100)"/>
+                                
+                                <!-- Center Hub -->
+                                <circle cx="100" cy="100" r="8" fill="#2C2C2C" stroke="#000" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="4" fill="#888"/>
+                                
+                                <!-- Glass Effect -->
+                                <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+                                <ellipse cx="100" cy="60" rx="30" ry="15" fill="rgba(255,255,255,0.2)"/>
+                            </svg>
+                            <div class="instrument-label">
+                                <span class="instrument-icon">MRL</span>
+                                MORALE
+                            </div>
+                            <div class="instrument-value" id="morale-value">75%</div>
                         </div>
                     </div>
-                    
-                    <div class="gauge" id="knowledge-gauge">
-                        <div class="gauge-label">Knowledge</div>
-                        <div class="gauge-value" id="knowledge-value">30%</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="knowledge-bar"></div>
+
+                        <!-- Knowledge - Airspeed Indicator Style -->
+                        <div class="instrument" id="knowledge-instrument" role="progressbar" aria-label="Knowledge Level" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" tabindex="0">
+                        <div class="instrument-bezel">
+                            <svg class="gauge-svg" viewBox="0 0 200 200">
+                                <!-- Outer Ring -->
+                                <circle cx="100" cy="100" r="95" fill="#2C2C2C" stroke="#1a1a1a" stroke-width="3"/>
+                                <circle cx="100" cy="100" r="85" fill="#F5F5DC" stroke="#888" stroke-width="1"/>
+                                
+                                <!-- Airspeed Arc (Green/Yellow/Red zones) -->
+                                <path d="M 35 100 A 65 65 0 0 1 100 35" fill="none" stroke="#44AA44" stroke-width="8" opacity="0.3"/>
+                                <path d="M 100 35 A 65 65 0 0 1 165 100" fill="none" stroke="#FFA500" stroke-width="8" opacity="0.3"/>
+                                <path d="M 165 100 A 65 65 0 0 1 100 165" fill="none" stroke="#FF4444" stroke-width="8" opacity="0.3"/>
+                                
+                                <!-- Scale Marks - 6 point system aligned with labels -->
+                                <g class="scale-marks">
+                                    <!-- Major marks every 60 degrees (6 total) -->
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(0 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(60 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(120 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(180 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(240 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(300 100 100)"/>
+                                    
+                                    <!-- Minor marks every 30 degrees -->
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(30 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(90 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(150 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(210 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(270 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(330 100 100)"/>
+                                </g>
+                                
+                                <!-- Scale Numbers - positioned to align with tick marks -->
+                                <text x="100" y="32" text-anchor="middle" fill="#000" font-size="11" font-weight="bold">100</text>
+                                <text x="143" y="50" text-anchor="middle" fill="#000" font-size="11" font-weight="bold">80</text>
+                                <text x="143" y="160" text-anchor="middle" fill="#000" font-size="11" font-weight="bold">60</text>
+                                <text x="100" y="178" text-anchor="middle" fill="#000" font-size="11" font-weight="bold">40</text>
+                                <text x="57" y="160" text-anchor="middle" fill="#000" font-size="11" font-weight="bold">20</text>
+                                <text x="57" y="50" text-anchor="middle" fill="#000" font-size="11" font-weight="bold">0</text>
+                                
+                                <!-- Needle -->
+                                <line id="knowledge-needle" x1="100" y1="100" x2="100" y2="40" stroke="#44AA44" stroke-width="3" stroke-linecap="round" transform="rotate(225 100 100)"/>
+                                
+                                <!-- Center Hub -->
+                                <circle cx="100" cy="100" r="8" fill="#2C2C2C" stroke="#000" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="4" fill="#888"/>
+                                
+                                <!-- Glass Effect -->
+                                <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+                                <ellipse cx="100" cy="60" rx="30" ry="15" fill="rgba(255,255,255,0.2)"/>
+                            </svg>
+                            <div class="instrument-label">
+                                <span class="instrument-icon">KNW</span>
+                                KNOWLEDGE
+                            </div>
+                            <div class="instrument-value" id="knowledge-value">30%</div>
                         </div>
                     </div>
-                    
-                    <div class="gauge" id="safety-gauge">
-                        <div class="gauge-label">Safety</div>
-                        <div class="gauge-value" id="safety-value">80%</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="safety-bar"></div>
+
+                        <!-- Safety - Attitude Indicator Style -->
+                        <div class="instrument" id="safety-instrument" role="progressbar" aria-label="Safety Rating" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" tabindex="0">
+                        <div class="instrument-bezel">
+                            <svg class="gauge-svg" viewBox="0 0 200 200">
+                                <!-- Outer Ring -->
+                                <circle cx="100" cy="100" r="95" fill="#2C2C2C" stroke="#1a1a1a" stroke-width="3"/>
+                                <circle cx="100" cy="100" r="85" fill="#4A90B8" stroke="#888" stroke-width="1"/>
+                                
+                                <!-- Horizon Line -->
+                                <g id="safety-horizon" transform="rotate(0 100 100)">
+                                    <rect x="15" y="100" width="170" height="85" fill="#8B4513"/>
+                                    <line x1="15" y1="100" x2="185" y2="100" stroke="#FFF" stroke-width="3"/>
+                                    
+                                    <!-- Pitch Lines -->
+                                    <line x1="80" y1="80" x2="120" y2="80" stroke="#FFF" stroke-width="1" opacity="0.7"/>
+                                    <line x1="85" y1="120" x2="115" y2="120" stroke="#FFF" stroke-width="1" opacity="0.7"/>
+                                    <line x1="70" y1="60" x2="130" y2="60" stroke="#FFF" stroke-width="2"/>
+                                    <line x1="70" y1="140" x2="130" y2="140" stroke="#FFF" stroke-width="2"/>
+                                </g>
+                                
+                                <!-- Aircraft Symbol -->
+                                <g fill="#FFD700" stroke="#000" stroke-width="1">
+                                    <rect x="95" y="95" width="10" height="10" rx="1"/>
+                                    <rect x="70" y="98" width="25" height="4" rx="2"/>
+                                    <rect x="105" y="98" width="25" height="4" rx="2"/>
+                                </g>
+                                
+                                <!-- Center Hub -->
+                                <circle cx="100" cy="100" r="8" fill="#2C2C2C" stroke="#000" stroke-width="1"/>
+                                
+                                <!-- Glass Effect -->
+                                <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+                                <ellipse cx="100" cy="60" rx="30" ry="15" fill="rgba(255,255,255,0.2)"/>
+                            </svg>
+                            <div class="instrument-label">
+                                <span class="instrument-icon">SFT</span>
+                                SAFETY
+                            </div>
+                            <div class="instrument-value" id="safety-value">80%</div>
                         </div>
                     </div>
-                    
-                    <div class="gauge" id="money-gauge">
-                        <div class="gauge-label">Budget</div>
-                        <div class="gauge-value" id="money-value">$15,000</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="money-bar"></div>
-                        </div>
                     </div>
                     
-                    <div class="gauge" id="hours-gauge">
-                        <div class="gauge-label">Flight Hours</div>
-                        <div class="gauge-value" id="hours-value">0.0</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="hours-bar"></div>
+                    <!-- Secondary Flight Instruments Group -->
+                    <div class="instrument-group secondary-group" role="group" aria-label="Secondary Flight Instruments">
+                    <!-- Money - Fuel Gauge Style -->
+                        <div class="instrument" id="money-instrument" role="progressbar" aria-label="Available Budget" aria-valuenow="15000" aria-valuemin="0" aria-valuemax="15000" tabindex="0">
+                        <div class="instrument-bezel">
+                            <svg class="gauge-svg" viewBox="0 0 200 200">
+                                <!-- Outer Ring -->
+                                <circle cx="100" cy="100" r="95" fill="#2C2C2C" stroke="#1a1a1a" stroke-width="3"/>
+                                <circle cx="100" cy="100" r="85" fill="#F5F5DC" stroke="#888" stroke-width="1"/>
+                                
+                                <!-- Fuel level zones -->
+                                <path d="M 50 150 A 65 65 0 0 1 35 100" fill="none" stroke="#FF4444" stroke-width="8" opacity="0.3"/>
+                                <path d="M 35 100 A 65 65 0 0 1 100 35" fill="none" stroke="#FFA500" stroke-width="8" opacity="0.3"/>
+                                <path d="M 100 35 A 65 65 0 0 1 165 100" fill="none" stroke="#44AA44" stroke-width="8" opacity="0.3"/>
+                                
+                                <!-- Scale Marks - 6 point system aligned with labels -->
+                                <g class="scale-marks">
+                                    <!-- Major marks every 60 degrees (6 total) -->
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(0 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(60 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(120 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(180 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(240 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(300 100 100)"/>
+                                    
+                                    <!-- Minor marks every 30 degrees -->
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(30 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(90 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(150 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(210 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(270 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(330 100 100)"/>
+                                </g>
+                                
+                                <!-- Labels - positioned to align with tick marks -->
+                                <text x="100" y="32" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">FULL</text>
+                                <text x="143" y="50" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">4/5</text>
+                                <text x="143" y="160" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">3/5</text>
+                                <text x="100" y="178" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">2/5</text>
+                                <text x="57" y="160" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">1/5</text>
+                                <text x="57" y="50" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">E</text>
+                                
+                                <!-- Needle -->
+                                <line id="money-needle" x1="100" y1="100" x2="100" y2="40" stroke="#FFD700" stroke-width="3" stroke-linecap="round" transform="rotate(0 100 100)"/>
+                                
+                                <!-- Center Hub -->
+                                <circle cx="100" cy="100" r="8" fill="#2C2C2C" stroke="#000" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="4" fill="#888"/>
+                                
+                                <!-- Glass Effect -->
+                                <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+                                <ellipse cx="100" cy="60" rx="30" ry="15" fill="rgba(255,255,255,0.2)"/>
+                            </svg>
+                            <div class="instrument-label">
+                                <span class="instrument-icon">$</span>
+                                BUDGET
+                            </div>
+                            <div class="instrument-value" id="money-value">$15,000</div>
                         </div>
                     </div>
-                    
-                    <div class="gauge" id="progress-gauge">
-                        <div class="gauge-label">Progress</div>
-                        <div class="gauge-value" id="progress-value">0%</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="progress-bar"></div>
+
+                        <!-- Hours - Tachometer Style -->
+                        <div class="instrument" id="hours-instrument" role="progressbar" aria-label="Flight Hours Logged" aria-valuenow="0" aria-valuemin="0" aria-valuemax="50" tabindex="0">
+                        <div class="instrument-bezel">
+                            <svg class="gauge-svg" viewBox="0 0 200 200">
+                                <!-- Outer Ring -->
+                                <circle cx="100" cy="100" r="95" fill="#2C2C2C" stroke="#1a1a1a" stroke-width="3"/>
+                                <circle cx="100" cy="100" r="85" fill="#F5F5DC" stroke="#888" stroke-width="1"/>
+                                
+                                <!-- RPM zones (adapted for hours) -->
+                                <path d="M 35 100 A 65 65 0 0 1 50 50" fill="none" stroke="#44AA44" stroke-width="8" opacity="0.3"/>
+                                <path d="M 50 50 A 65 65 0 0 1 150 50" fill="none" stroke="#FFA500" stroke-width="8" opacity="0.3"/>
+                                <path d="M 150 50 A 65 65 0 0 1 165 100" fill="none" stroke="#FF4444" stroke-width="8" opacity="0.3"/>
+                                
+                                <!-- Scale Marks - 6 point system aligned with labels -->
+                                <g class="scale-marks">
+                                    <!-- Major marks every 60 degrees (6 total) -->
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(0 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(60 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(120 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(180 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(240 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(300 100 100)"/>
+                                    
+                                    <!-- Minor marks every 30 degrees -->
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(30 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(90 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(150 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(210 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(270 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(330 100 100)"/>
+                                </g>
+                                
+                                <!-- Scale Numbers - positioned to align with tick marks -->
+                                <text x="100" y="32" text-anchor="middle" fill="#000" font-size="11" font-weight="bold">50</text>
+                                <text x="143" y="50" text-anchor="middle" fill="#000" font-size="11" font-weight="bold">40</text>
+                                <text x="143" y="160" text-anchor="middle" fill="#000" font-size="11" font-weight="bold">30</text>
+                                <text x="100" y="178" text-anchor="middle" fill="#000" font-size="11" font-weight="bold">20</text>
+                                <text x="57" y="160" text-anchor="middle" fill="#000" font-size="11" font-weight="bold">10</text>
+                                <text x="57" y="50" text-anchor="middle" fill="#000" font-size="11" font-weight="bold">0</text>
+                                
+                                <!-- Needle -->
+                                <line id="hours-needle" x1="100" y1="100" x2="100" y2="40" stroke="#87CEEB" stroke-width="3" stroke-linecap="round" transform="rotate(180 100 100)"/>
+                                
+                                <!-- Center Hub -->
+                                <circle cx="100" cy="100" r="8" fill="#2C2C2C" stroke="#000" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="4" fill="#888"/>
+                                
+                                <!-- Glass Effect -->
+                                <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+                                <ellipse cx="100" cy="60" rx="30" ry="15" fill="rgba(255,255,255,0.2)"/>
+                            </svg>
+                            <div class="instrument-label">
+                                <span class="instrument-icon">HRS</span>
+                                FLIGHT HRS
+                            </div>
+                            <div class="instrument-value" id="hours-value">0.0</div>
                         </div>
+                    </div>
+                    </div>
+                    
+                    <!-- Alert Status Instruments Group -->
+                    <div class="instrument-group alert-group" role="group" aria-label="Alert Status Instruments">
+                    <!-- Fatigue - Engine Temperature Style -->
+                        <div class="instrument" id="fatigue-instrument" role="progressbar" aria-label="Fatigue Level" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" tabindex="0">
+                        <div class="instrument-bezel">
+                            <svg class="gauge-svg" viewBox="0 0 200 200">
+                                <!-- Outer Ring -->
+                                <circle cx="100" cy="100" r="95" fill="#2C2C2C" stroke="#1a1a1a" stroke-width="3"/>
+                                <circle cx="100" cy="100" r="85" fill="#F5F5DC" stroke="#888" stroke-width="1"/>
+                                
+                                <!-- Temperature zones (Cold-Normal-Hot) -->
+                                <path d="M 50 150 A 65 65 0 0 1 35 100" fill="none" stroke="#44AA44" stroke-width="8" opacity="0.3"/>
+                                <path d="M 35 100 A 65 65 0 0 1 100 35" fill="none" stroke="#FFA500" stroke-width="8" opacity="0.3"/>
+                                <path d="M 100 35 A 65 65 0 0 1 165 100" fill="none" stroke="#FF4444" stroke-width="8" opacity="0.3"/>
+                                
+                                <!-- Scale Marks - 6 point system aligned with labels -->
+                                <g class="scale-marks">
+                                    <!-- Major marks every 60 degrees (6 total) -->
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(0 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(60 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(120 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(180 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(240 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="35" stroke="#000" stroke-width="2" transform="rotate(300 100 100)"/>
+                                    
+                                    <!-- Minor marks every 30 degrees -->
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(30 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(90 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(150 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(210 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(270 100 100)"/>
+                                    <line x1="100" y1="20" x2="100" y2="28" stroke="#000" stroke-width="1" transform="rotate(330 100 100)"/>
+                                </g>
+                                
+                                <!-- Labels - positioned to align with tick marks -->
+                                <text x="100" y="32" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">MAX</text>
+                                <text x="143" y="50" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">HIGH</text>
+                                <text x="143" y="160" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">MED</text>
+                                <text x="100" y="178" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">MED-</text>
+                                <text x="57" y="160" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">LOW</text>
+                                <text x="57" y="50" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">MIN</text>
+                                
+                                <!-- Needle -->
+                                <line id="fatigue-needle" x1="100" y1="100" x2="100" y2="40" stroke="#44AA44" stroke-width="3" stroke-linecap="round" transform="rotate(240 100 100)"/>
+                                
+                                <!-- Center Hub -->
+                                <circle cx="100" cy="100" r="8" fill="#2C2C2C" stroke="#000" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="4" fill="#888"/>
+                                
+                                <!-- Glass Effect -->
+                                <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+                                <ellipse cx="100" cy="60" rx="30" ry="15" fill="rgba(255,255,255,0.2)"/>
+                            </svg>
+                            <div class="instrument-label">
+                                <span class="instrument-icon">FTG</span>
+                                FATIGUE
+                            </div>
+                            <div class="instrument-value" id="fatigue-value">0%</div>
+                        </div>
+                    </div>
+
+                        <!-- Progress - HSI/Compass Style -->
+                        <div class="instrument" id="progress-instrument" role="progressbar" aria-label="Training Progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" tabindex="0">
+                        <div class="instrument-bezel">
+                            <svg class="gauge-svg" viewBox="0 0 200 200">
+                                <!-- Outer Ring -->
+                                <circle cx="100" cy="100" r="95" fill="#2C2C2C" stroke="#1a1a1a" stroke-width="3"/>
+                                <circle cx="100" cy="100" r="85" fill="#1a1a1a" stroke="#888" stroke-width="1"/>
+                                
+                                <!-- Compass Rose -->
+                                <g class="compass-rose">
+                                    <!-- Cardinal directions -->
+                                    <line x1="100" y1="25" x2="100" y2="40" stroke="#FFF" stroke-width="3"/>
+                                    <line x1="175" y1="100" x2="160" y2="100" stroke="#FFF" stroke-width="3"/>
+                                    <line x1="100" y1="175" x2="100" y2="160" stroke="#FFF" stroke-width="3"/>
+                                    <line x1="25" y1="100" x2="40" y2="100" stroke="#FFF" stroke-width="3"/>
+                                    
+                                    <!-- Intermediate directions -->
+                                    <line x1="148" y1="52" x2="138" y2="62" stroke="#FFF" stroke-width="2"/>
+                                    <line x1="148" y1="148" x2="138" y2="138" stroke="#FFF" stroke-width="2"/>
+                                    <line x1="52" y1="148" x2="62" y2="138" stroke="#FFF" stroke-width="2"/>
+                                    <line x1="52" y1="52" x2="62" y2="62" stroke="#FFF" stroke-width="2"/>
+                                </g>
+                                
+                                <!-- Labels - compass directions -->
+                                <text x="100" y="18" text-anchor="middle" fill="#FFF" font-size="12" font-weight="bold">N</text>
+                                <text x="188" y="105" text-anchor="middle" fill="#FFF" font-size="12" font-weight="bold">E</text>
+                                <text x="100" y="192" text-anchor="middle" fill="#FFF" font-size="12" font-weight="bold">S</text>
+                                <text x="12" y="105" text-anchor="middle" fill="#FFF" font-size="12" font-weight="bold">W</text>
+                                
+                                <!-- Progress Arc -->
+                                <path id="progress-arc" d="M 100 25 A 75 75 0 0 1 100 25" fill="none" stroke="#44AA44" stroke-width="6" opacity="0.8"/>
+                                
+                                <!-- Aircraft Symbol -->
+                                <g fill="#FFD700" stroke="#000" stroke-width="1">
+                                    <polygon points="100,85 105,100 100,115 95,100" />
+                                    <rect x="90" y="98" width="20" height="4" rx="2"/>
+                                </g>
+                                
+                                <!-- Center -->
+                                <circle cx="100" cy="100" r="8" fill="#2C2C2C" stroke="#FFF" stroke-width="2"/>
+                                
+                                <!-- Glass Effect -->
+                                <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+                                <ellipse cx="100" cy="60" rx="30" ry="15" fill="rgba(255,255,255,0.2)"/>
+                            </svg>
+                            <div class="instrument-label">
+                                <span class="instrument-icon">PRG</span>
+                                PROGRESS
+                            </div>
+                            <div class="instrument-value" id="progress-value">0%</div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                
+                <!-- Abbreviation Legend -->
+                <div class="abbreviation-legend">
+                    <div class="legend-item">
+                        <span class="legend-abbr">MRL</span>
+                        <span class="legend-desc">Morale (motivation and mental state)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-abbr">KNW</span>
+                        <span class="legend-desc">Knowledge (aviation theory and regulations)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-abbr">SFT</span>
+                        <span class="legend-desc">Safety (procedural compliance and risk management)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-abbr">HRS</span>
+                        <span class="legend-desc">Flight Hours (logged flight time)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-abbr">FTG</span>
+                        <span class="legend-desc">Fatigue (accumulated stress and tiredness)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-abbr">PRG</span>
+                        <span class="legend-desc">Progress (overall completion percentage)</span>
                     </div>
                 </div>
             </section>
@@ -75,8 +485,8 @@
             <section class="event-section">
                 <div class="event-card" id="event-card">
                     <div class="event-header">
-                        <span class="event-week">Week 1</span>
-                        <span class="event-type">📚 Ground School</span>
+                        <span class="event-week">Day 1</span>
+                        <span class="event-type">Ground School</span>
                     </div>
                     <div class="event-content" id="event-text">
                         Welcome to flight training! You've just signed up for ground school at your local flight training center. Your instructor mentions that weather has been unpredictable lately, but you're excited to start your journey toward becoming a private pilot.
@@ -85,59 +495,146 @@
                 </div>
             </section>
 
-            <!-- Action Buttons -->
-            <section class="actions-section">
-                <h3>What's your plan for this week?</h3>
+            <!-- Action Buttons with Previews -->
+            <section class="actions-section" role="region" aria-labelledby="actions-heading">
+                <h3 id="actions-heading">What's your plan for today?</h3>
+                <div class="current-conditions" id="current-conditions">
+                    <div class="weather-info">
+                        <span class="weather-icon">CLEAR</span>
+                        <span class="weather-text" id="weather-text">Clear skies - Perfect for flying!</span>
+                    </div>
+                    <div class="recommendation" id="action-recommendation">
+                        Recommended: Build knowledge with study sessions
+                    </div>
+                </div>
+                
                 <div class="action-buttons">
-                    <button class="action-btn" id="study-btn" onclick="takeAction('study')">
-                        <span class="btn-icon">📚</span>
+                    <button class="action-btn" id="study-btn" onclick="takeAction('study')" onmouseover="showActionPreview('study')" onmouseout="hideActionPreview()" aria-label="Study - Build knowledge through books and ground school" tabindex="0">
+                        <span class="btn-icon">STUDY</span>
                         <div class="btn-content">
                             <div class="btn-title">Study</div>
                             <div class="btn-description">Hit the books (Free)</div>
+                            <div class="btn-preview" id="study-preview">
+                                <span class="preview-stat knowledge">KNW +15</span>
+                                <span class="preview-stat morale">MRL -5</span>
+                                <span class="preview-stat safety">SFT +5</span>
+                            </div>
                         </div>
                     </button>
                     
-                    <button class="action-btn" id="fly-btn" onclick="takeAction('fly')">
-                        <span class="btn-icon">✈️</span>
+                    <button class="action-btn" id="fly-btn" onclick="takeAction('fly')" onmouseover="showActionPreview('fly')" onmouseout="hideActionPreview()" aria-label="Schedule Flight - Practice flying with instructor" tabindex="0">
+                        <span class="btn-icon">FLY</span>
                         <div class="btn-content">
                             <div class="btn-title">Schedule Flight</div>
-                            <div class="btn-description">Book lesson ($250)</div>
+                            <div class="btn-description" id="fly-description">Book lesson ($250)</div>
+                            <div class="btn-preview" id="fly-preview">
+                                <span class="preview-stat hours">HRS +1.5</span>
+                                <span class="preview-stat knowledge">KNW +9</span>
+                                <span class="preview-stat morale">MRL +12</span>
+                                <span class="preview-stat money">-$250</span>
+                            </div>
                         </div>
                     </button>
                     
-                    <button class="action-btn" id="rest-btn" onclick="takeAction('rest')">
-                        <span class="btn-icon">😴</span>
+                    <button class="action-btn" id="rest-btn" onclick="takeAction('rest')" onmouseover="showActionPreview('rest')" onmouseout="hideActionPreview()" aria-label="Rest - Take a break to recover morale and reduce fatigue" tabindex="0">
+                        <span class="btn-icon">REST</span>
                         <div class="btn-content">
                             <div class="btn-title">Rest</div>
                             <div class="btn-description">Take a break (Free)</div>
+                            <div class="btn-preview" id="rest-preview">
+                                <span class="preview-stat morale">MRL +20</span>
+                                <span class="preview-stat safety">SFT +8</span>
+                                <span class="preview-stat knowledge">KNW -4</span>
+                            </div>
                         </div>
                     </button>
                 </div>
             </section>
 
-            <!-- Logbook Section -->
+            <!-- Pilot's Logbook Section -->
             <section class="logbook-section">
-                <h3>Flight Logbook</h3>
-                <div class="logbook">
-                    <div class="logbook-header">
-                        <span>Date</span>
-                        <span>Activity</span>
-                        <span>Hours</span>
-                        <span>Cost</span>
-                    </div>
-                    <div class="logbook-entries" id="logbook-entries">
-                        <div class="logbook-entry">
-                            <span>Week 1</span>
-                            <span>Ground School</span>
-                            <span>0.0</span>
-                            <span>$0</span>
+                <div class="logbook-container">
+                    <!-- Logbook Cover -->
+                    <div class="logbook-cover">
+                        <div class="logbook-title">
+                            <h3>PILOT'S FLIGHT LOG</h3>
+                            <div class="logbook-subtitle">Private Pilot Training Record</div>
                         </div>
+                        
+                        <!-- Binding rings -->
+                        <div class="binding-ring" style="top: 15%;"></div>
+                        <div class="binding-ring" style="top: 50%;"></div>
+                        <div class="binding-ring" style="top: 85%;"></div>
                     </div>
-                    <div class="logbook-totals">
-                        <span>Totals:</span>
-                        <span>-</span>
-                        <span id="total-hours">0.0 hrs</span>
-                        <span id="total-spent">$0</span>
+                    
+                    <!-- Logbook Pages -->
+                    <div class="logbook-pages">
+                        <!-- Page 1 - Flight Log -->
+                        <div class="logbook-page">
+                            <!-- Paper texture overlay -->
+                            <div class="paper-texture"></div>
+                            
+                            <!-- Coffee stain -->
+                            <div class="coffee-stain"></div>
+                            
+                            <!-- Ruled lines background -->
+                            <div class="ruled-lines"></div>
+                            
+                            <!-- Page header -->
+                            <div class="page-header">
+                                <div class="page-title">FLIGHT TRAINING LOG</div>
+                                <div class="page-number">Page 1</div>
+                            </div>
+                            
+                            <!-- Column headers -->
+                            <div class="logbook-headers">
+                                <div class="header-cell date-col">DATE</div>
+                                <div class="header-cell activity-col">TRAINING ACTIVITY</div>
+                                <div class="header-cell hours-col">HOURS</div>
+                                <div class="header-cell cost-col">COST</div>
+                                <div class="header-cell instructor-col">CFI INITIALS</div>
+                            </div>
+                            
+                            <!-- Flight entries -->
+                            <div class="logbook-entries" id="logbook-entries">
+                                <div class="logbook-entry">
+                                    <div class="entry-cell date-col">Week 1</div>
+                                    <div class="entry-cell activity-col">Ground School Introduction</div>
+                                    <div class="entry-cell hours-col">0.0</div>
+                                    <div class="entry-cell cost-col">$0</div>
+                                    <div class="entry-cell instructor-col">J.P.</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Instructor signature area -->
+                            <div class="signature-area">
+                                <div class="signature-line">
+                                    <span class="signature-label">Chief Flight Instructor:</span>
+                                    <div class="signature">John Peterson, CFI #2847563</div>
+                                </div>
+                                <div class="endorsement-text">
+                                    "This student has demonstrated satisfactory progress in ground school fundamentals 
+                                    and is authorized to continue flight training."
+                                </div>
+                            </div>
+                            
+                            <!-- Totals section -->
+                            <div class="logbook-totals">
+                                <div class="totals-label">TOTAL FLIGHT TIME:</div>
+                                <div class="totals-hours" id="total-hours">0.0 hrs</div>
+                                <div class="totals-cost-label">TOTAL COST:</div>
+                                <div class="totals-cost" id="total-spent">$0</div>
+                            </div>
+                            
+                            <!-- Handwritten note -->
+                            <div class="handwritten-note">
+                                "Remember: Attitude, Altitude, Airspeed - in that order! -JP"
+                            </div>
+                            
+                            <!-- Page wear effects -->
+                            <div class="page-corner-fold"></div>
+                            <div class="ink-smudge"></div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -146,11 +643,271 @@
         <!-- Game Controls -->
         <footer>
             <div class="game-controls">
-                <button onclick="saveGame()">💾 Save Game</button>
-                <button onclick="loadGame()">📂 Load Game</button>
-                <button onclick="resetGame()">🔄 New Game</button>
+                <button onclick="resetGame()">New Game</button>
+                <button onclick="showTutorial()">Help/Tutorial</button>
             </div>
         </footer>
+    </div>
+
+    <!-- Tutorial Modal -->
+    <div class="modal-overlay" id="tutorial-modal">
+        <div class="tutorial-modal">
+            <div class="tutorial-header">
+                <h2 class="tutorial-title">Welcome to PPL Simulator</h2>
+                <p class="tutorial-subtitle">Your Journey to Becoming a Private Pilot</p>
+                <button class="close-button" onclick="closeTutorial()">&times;</button>
+            </div>
+            <div class="tutorial-content">
+                <div class="tutorial-section">
+                    <h3>Your Aviation Journey Begins</h3>
+                    <p>Welcome, future aviator! You've just enrolled in flight training with $15,000 and a dream of earning your Private Pilot License (PPL). This isn't just a game – it's a realistic simulation of what thousands of student pilots experience every year.</p>
+                    <p>The path to your PPL requires 40 flight hours minimum, comprehensive ground knowledge, and passing both written and practical exams. Weather, finances, and your own stamina will all play crucial roles in your success.</p>
+                </div>
+
+                <div class="tutorial-section">
+                    <h3>Understanding Your Instruments</h3>
+                    <p>Your cockpit displays six key instruments that track your progress:</p>
+                    <div class="stats-explanation">
+                        <div class="stat-item">
+                            <span class="stat-icon">MRL</span>
+                            <div class="stat-name">Morale</div>
+                            <div class="stat-description">Your motivation and mental state. Keep this high to maintain focus and enjoyment.</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-icon">KNW</span>
+                            <div class="stat-name">Knowledge</div>
+                            <div class="stat-description">Aviation theory and regulations. Essential for passing your written exam and checkride.</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-icon">SFT</span>
+                            <div class="stat-name">Safety</div>
+                            <div class="stat-description">Procedural compliance and risk management. Critical for solo endorsement.</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-icon">HRS</span>
+                            <div class="stat-name">Flight Hours</div>
+                            <div class="stat-description">Your logged flight time. You need 40 hours minimum for your PPL.</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-icon">$</span>
+                            <div class="stat-name">Budget</div>
+                            <div class="stat-description">Your remaining funds. Manage carefully – running out ends your training.</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-icon">FTG</span>
+                            <div class="stat-name">Fatigue</div>
+                            <div class="stat-description">Accumulated stress and tiredness. High fatigue reduces learning effectiveness.</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-icon">PRG</span>
+                            <div class="stat-name">Progress</div>
+                            <div class="stat-description">Overall completion toward your PPL. Combines all other factors.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tutorial-section">
+                    <h3>Quick Start Guide</h3>
+                    <p><strong>Goal:</strong> Earn your Private Pilot License in 40+ flight hours</p>
+                    <ul class="tips-list">
+                        <li><strong>Study:</strong> Build knowledge (free, builds theory)</li>
+                        <li><strong>Fly:</strong> Gain flight hours (costs money, weather dependent)</li>
+                        <li><strong>Rest:</strong> Recover morale and reduce fatigue</li>
+                    </ul>
+                    
+                    <div class="tip-highlight">
+                        <strong>💡 Key Tips:</strong> Balance study, flying, and rest. Watch your budget and weather conditions!
+                    </div>
+                </div>
+
+                <div class="navigation-tips">
+                    <h4>Accessibility & Navigation</h4>
+                    <ul class="tips-list">
+                        <li><strong>Keyboard Navigation:</strong> Use Arrow keys or Tab to navigate, Enter/Space to activate</li>
+                        <li><strong>Quick Actions:</strong> Press 1 for Study, 2 for Fly, 3 for Rest</li>
+                        <li><strong>Game Controls:</strong> H or ? for help, Ctrl+N for new game</li>
+                        <li><strong>Instruments:</strong> Focus on any instrument and press Enter for detailed status</li>
+                        <li><strong>Screen Readers:</strong> All instruments have proper ARIA labels and live updates</li>
+                        <li><strong>Mobile:</strong> All touch targets are at least 48px for easy tapping</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tutorial-controls">
+                <button class="tutorial-button" onclick="closeTutorial()">Start My Training</button>
+                <button class="tutorial-button secondary" onclick="resetGame(); closeTutorial();">New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dramatic Game Over Modal -->
+    <div class="dramatic-ending-overlay" id="gameover-modal" style="display: none;">
+        <div class="dramatic-ending-modal">
+            <div class="dramatic-background">
+                <div class="sky-gradient"></div>
+                <div class="clouds"></div>
+                <div class="runway-fade"></div>
+            </div>
+            
+            <div class="dramatic-content">
+                <div class="ending-title-section">
+                    <h1 class="dramatic-title" id="dramatic-title">Wings Folded</h1>
+                    <div class="title-underline"></div>
+                </div>
+                
+                <div class="narrative-section">
+                    <p class="narrative-text" id="narrative-text">
+                        <!-- Dramatic narrative will be populated here with typewriter effect -->
+                    </p>
+                </div>
+                
+                <div class="journey-stats">
+                    <div class="stats-header">Your Aviation Journey</div>
+                    <div class="journey-grid">
+                        <div class="journey-stat">
+                            <div class="stat-icon">📅</div>
+                            <div class="stat-number" id="journey-days">0</div>
+                            <div class="stat-label">Days</div>
+                        </div>
+                        <div class="journey-stat">
+                            <div class="stat-icon">✈️</div>
+                            <div class="stat-number" id="journey-hours">0.0</div>
+                            <div class="stat-label">Hours</div>
+                        </div>
+                        <div class="journey-stat">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-number" id="journey-spent">$0</div>
+                            <div class="stat-label">Invested</div>
+                        </div>
+                        <div class="journey-stat">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-number" id="journey-progress">0%</div>
+                            <div class="stat-label">Progress</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="epilogue-section">
+                    <p class="epilogue-text" id="epilogue-text">
+                        <!-- Encouraging epilogue will be populated here -->
+                    </p>
+                </div>
+                
+                <div class="dramatic-controls">
+                    <button class="dramatic-btn primary" onclick="resetGame(); closeDramaticEnding();">
+                        <span class="btn-icon">🛫</span>
+                        Begin New Journey
+                    </button>
+                    <button class="dramatic-btn secondary" onclick="loadGame(); closeDramaticEnding();" id="load-dramatic-btn">
+                        <span class="btn-icon">📂</span>
+                        Continue Previous Flight
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Celebration Modal -->
+    <div class="modal-overlay" id="celebration-modal" style="display: none;">
+        <div class="celebration-modal">
+            <div class="celebration-header">
+                <div class="celebration-title">CONGRATULATIONS!</div>
+                <div class="celebration-subtitle">Private Pilot License Earned</div>
+                <div class="celebration-date" id="celebration-date">Training Completed</div>
+            </div>
+            
+            <div class="celebration-content">
+                <div class="wings-animation">
+                    <div class="pilot-wings">
+                        <div class="wing-left"></div>
+                        <div class="wing-center"></div>
+                        <div class="wing-right"></div>
+                    </div>
+                </div>
+                
+                <div class="celebration-message" id="celebration-message">
+                    You've successfully completed your private pilot training! Through dedication, 
+                    perseverance, and countless hours of study and flight time, you've achieved 
+                    your dream of becoming a certified pilot. The skies await your adventures!
+                </div>
+                
+                <div class="final-stats">
+                    <div class="stats-grid">
+                        <div class="final-stat">
+                            <div class="stat-label">Total Flight Hours</div>
+                            <div class="stat-value" id="final-hours">0.0</div>
+                        </div>
+                        <div class="final-stat">
+                            <div class="stat-label">Training Duration</div>
+                            <div class="stat-value" id="final-duration">0 days</div>
+                        </div>
+                        <div class="final-stat">
+                            <div class="stat-label">Total Investment</div>
+                            <div class="stat-value" id="final-cost">$0</div>
+                        </div>
+                        <div class="final-stat">
+                            <div class="stat-label">Final Knowledge</div>
+                            <div class="stat-value" id="final-knowledge">0%</div>
+                        </div>
+                        <div class="final-stat">
+                            <div class="stat-label">Safety Record</div>
+                            <div class="stat-value" id="final-safety">0%</div>
+                        </div>
+                        <div class="final-stat">
+                            <div class="stat-label">Remaining Budget</div>
+                            <div class="stat-value" id="final-money">$0</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="achievements-section">
+                    <div class="achievements-title">Flight Training Milestones</div>
+                    <div class="achievements-list" id="achievements-list">
+                        <div class="achievement completed" id="achievement-ground">
+                            <div class="achievement-icon">GND</div>
+                            <div class="achievement-name">Ground School</div>
+                            <div class="achievement-desc">Mastered aviation fundamentals</div>
+                        </div>
+                        <div class="achievement completed" id="achievement-presolo">
+                            <div class="achievement-icon">PRE</div>
+                            <div class="achievement-name">Pre-Solo</div>
+                            <div class="achievement-desc">Ready for independent flight</div>
+                        </div>
+                        <div class="achievement completed" id="achievement-solo">
+                            <div class="achievement-icon">SOLO</div>
+                            <div class="achievement-name">First Solo</div>
+                            <div class="achievement-desc">Flew without instructor</div>
+                        </div>
+                        <div class="achievement completed" id="achievement-cross">
+                            <div class="achievement-icon">XC</div>
+                            <div class="achievement-name">Cross Country</div>
+                            <div class="achievement-desc">Long distance navigation</div>
+                        </div>
+                        <div class="achievement completed" id="achievement-checkride">
+                            <div class="achievement-icon">PPL</div>
+                            <div class="achievement-name">Checkride Passed</div>
+                            <div class="achievement-desc">Licensed private pilot</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="certificate-section">
+                    <div class="certificate">
+                        <div class="certificate-header">PRIVATE PILOT LICENSE</div>
+                        <div class="certificate-body">
+                            This certifies that the bearer has successfully completed
+                            all requirements for Private Pilot privileges and is authorized
+                            to act as Pilot in Command of aircraft in the specified category.
+                        </div>
+                        <div class="certificate-number">Certificate #PPL-SIM-2025</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="celebration-controls">
+                <button class="celebration-btn primary" onclick="closeCelebration()">Continue Flying</button>
+                <button class="celebration-btn secondary" onclick="resetGame(); closeCelebration();">New Pilot</button>
+            </div>
+        </div>
     </div>
 
     <script src="game.js"></script>
