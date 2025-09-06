@@ -1091,7 +1091,14 @@ function initGame() {
 function takeAction(action) {
     if (gameState.gameEnded) return;
     
+    console.log(`[ACTION] === TAKING ACTION: ${action.toUpperCase()} ===`);
+    console.log(`[ACTION] Current game state before action:`);
+    console.log(`[ACTION] - Day: ${gameState.day}, Morale: ${gameState.stats.morale}, Fatigue: ${gameState.stats.fatigue}`);
+    console.log(`[ACTION] - Money: $${gameState.stats.money}, Safety: ${gameState.stats.safety}`);
+    
     const currentWeather = getWeeklyWeather();
+    console.log(`[ACTION] Current weather: ${currentWeather.description} (flyingFactor: ${currentWeather.flyingFactor})`);
+    
     let eventText = '';
     let impact = { morale: 0, knowledge: 0, safety: 0, money: 0, hours: 0 };
     
@@ -1122,8 +1129,11 @@ function takeAction(action) {
             
         case 'fly':
             const lessonDetails = calculateLessonCost();
+            console.log(`[FLY] Lesson cost: $${lessonDetails.cost}, Current money: $${gameState.stats.money}`);
+            console.log(`[FLY] Weather flying factor: ${currentWeather.flyingFactor} (need > 0.5 to fly)`);
             
             if (gameState.stats.money >= lessonDetails.cost && currentWeather.flyingFactor > 0.5) {
+                console.log('[FLY] ✈️  FLYING - Conditions good, money available');
                 // Weather affects lesson quality
                 const weatherImpact = currentWeather.flyingFactor;
                 const baseKnowledge = 6 + Math.floor(Math.random() * 6);
@@ -1159,10 +1169,12 @@ function takeAction(action) {
                 eventText += `($${lessonDetails.cost} - ${lessonDetails.hours} hours)`;
                 
             } else if (currentWeather.flyingFactor <= 0.5) {
+                console.log('[FLY] ❌ WEATHER CANCEL - Bad weather, doing ground school instead');
                 impact = { morale: -8, knowledge: 3, safety: 0, money: -50 }; // Ground school instead
                 eventText = `${currentWeather.description} canceled your flight lesson. You did ground school instead, but lost the scheduling deposit.`;
                 
             } else {
+                console.log('[FLY] 💸 NO MONEY - Cannot afford lesson');
                 impact = { morale: -12, knowledge: 0, safety: 0, money: 0 };
                 eventText = `You can't afford today's lesson ($${lessonDetails.cost}). Time to find a part-time job or hit the books.`;
             }
@@ -1229,6 +1241,8 @@ function takeAction(action) {
     }
     
     // Apply impacts
+    console.log(`[ACTION] Final impact calculated:`, impact);
+    console.log(`[ACTION] Event text: ${eventText}`);
     applyImpacts(impact);
     
     // Add to logbook
@@ -1237,22 +1251,30 @@ function takeAction(action) {
     // Advance day and update week for compatibility
     gameState.day++;
     gameState.week = Math.ceil(gameState.day / 7);
+    console.log(`[ACTION] Advanced to Day ${gameState.day}`);
     
     // Update phase if conditions met
     updatePhase();
     
     // Check win/lose conditions
+    console.log(`[ACTION] About to check end conditions...`);
     checkEndConditions();
+    console.log(`[ACTION] End conditions check complete. Game ended: ${gameState.gameEnded}`);
     
     // Auto-save game progress (unless game ended)
     if (!gameState.gameEnded) {
         saveGame();
+        console.log(`[ACTION] Game saved`);
+    } else {
+        console.log(`[ACTION] Skipping save - game has ended`);
     }
     
     // Update display
+    console.log(`[ACTION] Updating display...`);
     updateDisplay();
     showWeeklyEvent(eventText, impact);
     updateLogbook();
+    console.log(`[ACTION] === ACTION COMPLETE ===`);
 }
 
 // Check for fatigue-related effects and burnout
@@ -1397,8 +1419,14 @@ function updatePhase() {
 function checkEndConditions() {
     const stats = gameState.stats;
     
+    console.log(`[DEBUG] === CHECKING END CONDITIONS - Day ${gameState.day} ===`);
+    console.log(`[DEBUG] Money: $${stats.money}, Morale: ${stats.morale}%, Fatigue: ${stats.fatigue}%`);
+    console.log(`[DEBUG] Safety: ${stats.safety}%, Hours: ${stats.flightHours}, Progress: ${stats.progress}%`);
+    console.log(`[DEBUG] Knowledge: ${stats.knowledge}%`);
+    
     // Win condition - PPL obtained
     if (stats.flightHours >= 40 && stats.knowledge >= 85 && stats.safety >= 80 && stats.progress >= 95) {
+        console.log('[ENDING] ✅ SUCCESS: PPL requirements met!');
         endGame('success', `Congratulations! You've earned your Private Pilot License! 
                             Total time: ${gameState.day} days
                             Flight hours: ${stats.flightHours.toFixed(1)}
@@ -1408,6 +1436,7 @@ function checkEndConditions() {
     
     // Lose conditions
     if (gameState.day >= 365) {
+        console.log('[ENDING] ❌ TIMEOUT: Reached 1-year limit');
         endGame('timeout', `Time's up! You've reached the 1-year limit without completing your PPL. 
                            You got to ${stats.progress}% completion with ${stats.flightHours.toFixed(1)} hours logged.
                            Don't give up - many pilots take longer than expected!`);
@@ -1415,46 +1444,73 @@ function checkEndConditions() {
     }
     
     if (stats.money <= 500 && stats.progress < 90) {
+        console.log('[ENDING] ❌ BANKRUPT: Out of money before completion');
         endGame('broke', 'You ran out of money before completing your training. Maybe try a different approach to managing your budget.');
         return;
     }
     
     if (stats.morale <= 0) {
+        console.log('[ENDING] ❌ BURNOUT: Morale hit zero');
         endGame('burnout', 'Your motivation hit rock bottom. Flying is supposed to be fun! Take a break and come back when you\'re ready.');
         return;
     }
     
     if (stats.fatigue >= 100) {
+        console.log('[ENDING] ❌ EXHAUSTED: Fatigue maxed out');
         endGame('exhausted', 'You\'re completely exhausted and can no longer safely continue training. Rest and recovery are essential - pushing through extreme fatigue is dangerous in aviation.');
         return;
     }
     
     if (stats.safety <= 30 && stats.flightHours > 15) {
+        console.log('[ENDING] ❌ SAFETY: Safety too low with significant hours');
         endGame('safety', 'Your CFI has grounded you due to safety concerns. Time to go back to the basics.');
         return;
     }
     
     if (gameState.day > 700) {  // About 2 years - very realistic max timeline
+        console.log('[ENDING] ❌ TIME LIMIT: Training took too long');
         endGame('timeout', 'Your training has taken too long and you\'ve lost momentum. Maybe aviation isn\'t for everyone.');
         return;
     }
+    
+    console.log('[DEBUG] ✅ No ending conditions met - continuing game');
 }
 
 // End the game with a specific ending
 function endGame(endingType, message) {
+    console.log(`[CRITICAL] ===== GAME ENDING TRIGGERED =====`);
+    console.log(`[CRITICAL] Ending Type: ${endingType}`);
+    console.log(`[CRITICAL] Message: ${message}`);
+    console.log(`[CRITICAL] Game State Before: gameEnded=${gameState.gameEnded}`);
+    
     gameState.gameEnded = true;
     gameState.endingType = endingType;
     
+    console.log(`[CRITICAL] Game State After: gameEnded=${gameState.gameEnded}`);
+    
     // Show celebration modal for successful completion
     if (endingType === 'success') {
+        console.log('[CRITICAL] Showing celebration modal for success');
         showCelebrationModal();
     } else {
+        console.log('[CRITICAL] Showing game over modal for failure scenario');
+        console.log('[CRITICAL] About to call showGameOverModal()...');
+        
         // Show prominent game over modal for failure scenarios
         showGameOverModal(endingType, message);
         
+        console.log('[CRITICAL] showGameOverModal() call completed');
+        
         // Disable action buttons
-        document.querySelectorAll('.action-btn').forEach(btn => btn.disabled = true);
+        const actionButtons = document.querySelectorAll('.action-btn');
+        console.log(`[CRITICAL] Disabling ${actionButtons.length} action buttons`);
+        actionButtons.forEach(btn => {
+            btn.disabled = true;
+            console.log(`[CRITICAL] Disabled button: ${btn.textContent || btn.id}`);
+        });
     }
+    
+    console.log(`[CRITICAL] ===== END GAME FUNCTION COMPLETE =====`);
 }
 
 function getEndingIcon(type) {
@@ -1729,13 +1785,6 @@ function showDramaticEnding(endingType) {
         // Generate encouraging epilogue
         const epilogue = generateEpilogue(endingType);
         epilogueText.textContent = epilogue;
-        
-        // Check if save exists for load button
-        const loadBtn = document.getElementById('load-dramatic-btn');
-        const hasSave = localStorage.getItem('ppl_simulator_save');
-        if (loadBtn) {
-            loadBtn.style.display = hasSave ? 'block' : 'none';
-        }
         
         // Show modal - ensure it's visible
         modal.style.display = 'flex';  // Force display first
