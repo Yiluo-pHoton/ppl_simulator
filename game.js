@@ -119,6 +119,7 @@ const weatherConditions = {
 
 // Realistic lesson cost calculation - simplified for accuracy
 function calculateLessonCost() {
+    console.log(`[COST] calculateLessonCost() called`);
     // Dynamic aircraft selection based on phase and availability
     const selectedAircraft = selectAircraft();
     const selectedInstructor = selectInstructor();
@@ -2428,6 +2429,15 @@ function updateDisplay() {
         if (btnDesc) btnDesc.textContent = `Book lesson ($${lessonCost.cost})`;
     }
     
+    // Debug all action button states
+    const actionButtons = document.querySelectorAll('.action-btn');
+    console.log(`[DEBUG] Action button states:`);
+    actionButtons.forEach((btn, i) => {
+        const btnTitle = btn.querySelector('.btn-title');
+        const btnDesc = btn.querySelector('.btn-description');
+        console.log(`[DEBUG] Button ${i} (${btn.id}): title="${btnTitle?.textContent}", disabled=${btn.disabled}, classes="${btn.className}"`);
+    });
+    
     console.log('Display update completed successfully');
     
     // Add visual feedback for stat changes
@@ -3239,6 +3249,7 @@ function updateStaticButton(button, actionType) {
             cost = lessonCost.cost;
             available = stats.money >= cost && weather.flyingFactor > 0; // Can afford and weather allows
             description = available ? `Book lesson ($${cost})` : (stats.money < cost ? `Need $${cost}` : 'Weather too bad');
+            console.log(`[BUTTON] updateStaticButton FLY: money=$${stats.money}, cost=$${cost}, weather=${weather.flyingFactor}, available=${available}`);
             break;
             
         case 'rest':
