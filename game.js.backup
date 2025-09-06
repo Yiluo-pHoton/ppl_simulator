@@ -9,6 +9,7 @@ let cachedElements = {};
 
 let gameState = {
     day: 1,
+    week: 1, // Keep for compatibility during transition
     phase: 'Ground School',
     currentWeather: null, // Cache current weather
     
@@ -41,7 +42,8 @@ let gameState = {
         rate: 65,             // Hourly rate
         availability: 0.8,     // Chance available for lessons
         style: 'thorough',    // Affects training approach
-        changedCount: 0       // Track instructor changes
+        changedCount: 0,      // Track instructor changes
+        contractWeeks: 0      // Weeks left on current instructor
     },
     
     // Financial tracking with hidden costs
@@ -81,9 +83,9 @@ let gameState = {
     gameEnded: false,
     endingType: null,
     
-    // Skill decay tracking (in days)
-    lastFlightDay: 1,
-    lastStudyDay: 1,
+    // Skill decay tracking
+    lastFlightWeek: 1,         // Track skill decay
+    lastStudyWeek: 1,
     
     // Event frequency control
     eventsSinceLastMajor: 0,   // Control major event frequency
@@ -115,38 +117,153 @@ const weatherConditions = {
     windy: { description: 'High winds', flyingFactor: 0.6, moraleBonus: -5 }
 };
 
-// Simplified lesson cost calculation based on phase
+// Realistic lesson cost calculation - simplified for accuracy
 function calculateLessonCost() {
-    // Simple phase-based costs (aircraft + instructor included)
-    const phaseCosts = {
-        'Ground School': 280,
-        'Pre-Solo': 320,
-        'Solo Training': 350,
-        'Cross-Country': 420,
-        'Checkride Prep': 480
+    console.log(`[COST] calculateLessonCost() called`);
+    // Dynamic aircraft selection based on phase and availability
+    const selectedAircraft = selectAircraft();
+    const selectedInstructor = selectInstructor();
+    const currentWeather = getWeeklyWeather();
+    
+    // Base lesson time varies by phase and lesson type
+    let baseHours = calculateLessonDuration();
+    
+    // REALISTIC COST STRUCTURE:
+    // Aircraft rental: $150-200/hour (Hobbs time)
+    // CFI: $50-100/hour (typically 2 hours total lesson time)
+    // Additional costs: $15-50 for fuel, fees, etc.
+    
+    // Core costs only - no excessive multipliers
+    const aircraftCost = selectedAircraft.hourlyRate * baseHours;
+    const instructorCost = selectedInstructor.rate * 2.0; // Fixed 2-hour lesson block
+    
+    // Minimal additional costs
+    const costs = {
+        aircraft: aircraftCost,
+        instructor: instructorCost,
+        fuel: calculateFuelCosts(baseHours, selectedAircraft),
+        misc: 15 + Math.floor(Math.random() * 25) // Airport fees, small extras: $15-40
     };
     
-    // Get base cost for current phase
-    const baseCost = phaseCosts[gameState.phase] || 350;
+    // Calculate total without excessive multipliers
+    const subtotal = Object.values(costs).reduce((sum, cost) => sum + cost, 0);
     
-    // Add small random variation (±10%)
-    const variation = 0.9 + (Math.random() * 0.2);
-    const totalCost = Math.floor(baseCost * variation);
+    // Small random variation (±5%) instead of complex regional/market adjustments
+    const variation = 0.95 + (Math.random() * 0.1); // 95% to 105%
+    const totalCost = Math.floor(subtotal * variation);
     
-    // Calculate flight hours (1.3-1.7 hours per lesson)
-    const hours = 1.3 + (Math.random() * 0.4);
+    // Ensure costs stay in realistic range: $300-550 for typical lessons
+    const cappedCost = Math.min(Math.max(totalCost, 280), 550);
     
     return {
-        cost: totalCost,
-        hours: Math.round(hours * 10) / 10,
-        aircraft: { type: 'Cessna 172', hourlyRate: 150 },
-        instructor: { name: 'John Peterson', rate: 65 }
+        cost: cappedCost,
+        hours: Math.round(baseHours * 10) / 10,
+        aircraft: selectedAircraft,
+        instructor: selectedInstructor,
+        breakdown: {
+            ...costs,
+            total: cappedCost
+        }
     };
 }
 
+function selectAircraft() {
+    const stats = gameState.stats;
+    const availableAircraft = Object.values(aircraftTypes);
+    
+    // Advanced students might get better aircraft
+    if (stats.flightHours > 20 && stats.safety > 75) {
+        // More likely to get the Cessna 172 (more expensive but better)
+        return Math.random() < 0.7 ? aircraftTypes.c172 : aircraftTypes.c152;
+    }
+    
+    // Beginners typically get assigned less expensive aircraft
+    const weights = [0.6, 0.3, 0.1]; // C152 most likely for beginners
+    const aircraftList = [aircraftTypes.c152, aircraftTypes.c172, aircraftTypes.cherokee];
+    const random = Math.random();
+    
+    let cumulativeWeight = 0;
+    for (let i = 0; i < weights.length; i++) {
+        cumulativeWeight += weights[i];
+        if (random <= cumulativeWeight) {
+            return aircraftList[i];
+        }
+    }
+    
+    return aircraftTypes.c152; // Fallback
+}
 
+function selectInstructor() {
+    const stats = gameState.stats;
+    const phase = gameState.phase;
+    const instructorList = Object.values(instructors);
+    
+    // Advanced phases might require experienced instructors
+    if (phase === 'Checkride Prep' || stats.flightHours > 35) {
+        // More experienced instructors for checkride prep
+        return Math.random() < 0.6 ? instructors.taylor : instructors.martinez;
+    }
+    
+    // Random instructor selection with availability consideration
+    const availableInstructors = instructorList.filter(() => Math.random() < 0.8); // 80% availability
+    
+    if (availableInstructors.length > 0) {
+        return availableInstructors[Math.floor(Math.random() * availableInstructors.length)];
+    }
+    
+    return instructors.peterson; // Fallback if no one available
+}
 
+function calculateLessonDuration() {
+    const phase = gameState.phase;
+    const stats = gameState.stats;
+    
+    let baseDuration;
+    
+    switch (phase) {
+        case 'Ground School':
+        case 'Pre-Solo':
+            baseDuration = 1.2 + (Math.random() * 0.6); // 1.2-1.8 hours
+            break;
+        case 'Solo Training':
+            baseDuration = 1.0 + (Math.random() * 0.5); // Solo flights shorter
+            break;
+        case 'Cross-Country':
+            baseDuration = 2.0 + (Math.random() * 1.0); // Longer XC flights
+            break;
+        case 'Checkride Prep':
+            baseDuration = 1.5 + (Math.random() * 0.5); // Intensive practice
+            break;
+        default:
+            baseDuration = 1.3 + (Math.random() * 0.4);
+    }
+    
+    // Fatigue reduces lesson effectiveness and may extend time
+    if (stats.fatigue > 60) {
+        baseDuration *= 1.1 + (stats.fatigue / 500);
+    }
+    
+    return baseDuration;
+}
 
+function calculateFuelCosts(hours, aircraft) {
+    // Simplified fuel cost - often included in aircraft rental
+    // Only charge extra fuel for longer lessons
+    const fuelBurnRates = {
+        'Cessna 152': 6.0, // GPH
+        'Cessna 172': 8.5, // GPH
+        'Cherokee 140': 7.8 // GPH
+    };
+    
+    // Lower fuel pricing since often included in wet rates
+    const fuelPrice = 6.00; // Fixed price for simplicity
+    const burnRate = fuelBurnRates[aircraft.name] || 7.0;
+    const fuelUsed = hours * burnRate;
+    
+    // Most flight schools charge "wet" rates (fuel included)
+    // Only add fuel surcharge for long lessons
+    return hours > 2.0 ? Math.floor(fuelUsed * fuelPrice * 0.3) : 0;
+}
 
 function calculateGroundTime(instructor) {
     // Ground time now included in instructor rate - no extra charge
@@ -925,6 +1042,7 @@ function cacheDOMElements() {
         const needsNeedle = !['safety', 'progress'].includes(stat);
         
         if (!valueEl || !instrumentEl || (needsNeedle && !needleEl)) {
+            console.error(`Missing DOM element for stat: ${stat}`, {
                 value: !!valueEl,
                 needle: needsNeedle ? !!needleEl : 'not required',
                 instrument: !!instrumentEl
@@ -948,6 +1066,7 @@ function cacheDOMElements() {
     cachedElements.restBtn = document.getElementById('rest-btn');
     
     // Log cached button elements for debugging
+    console.log('Cached button elements:', {
         study: !!cachedElements.studyBtn,
         fly: !!cachedElements.flyBtn,
         rest: !!cachedElements.restBtn
@@ -958,9 +1077,13 @@ function cacheDOMElements() {
 }
 
 function initGame() {
+    console.log('Initializing PPL Simulator...');
     cacheDOMElements();
+    console.log('DOM elements cached, updating display...');
     updateDisplay();
+    console.log('Display updated, updating logbook...');
     updateLogbook();
+    console.log('Game initialization complete!');
     showCurrentEvent();
     checkTutorial();
 }
@@ -969,8 +1092,13 @@ function initGame() {
 function takeAction(action) {
     if (gameState.gameEnded) return;
     
+    console.log(`[ACTION] === TAKING ACTION: ${action.toUpperCase()} ===`);
+    console.log(`[ACTION] Current game state before action:`);
+    console.log(`[ACTION] - Day: ${gameState.day}, Morale: ${gameState.stats.morale}, Fatigue: ${gameState.stats.fatigue}`);
+    console.log(`[ACTION] - Money: $${gameState.stats.money}, Safety: ${gameState.stats.safety}`);
     
     const currentWeather = getWeeklyWeather();
+    console.log(`[ACTION] Current weather: ${currentWeather.description} (flyingFactor: ${currentWeather.flyingFactor})`);
     
     let eventText = '';
     let impact = { morale: 0, knowledge: 0, safety: 0, money: 0, hours: 0 };
@@ -1002,8 +1130,11 @@ function takeAction(action) {
             
         case 'fly':
             const lessonDetails = calculateLessonCost();
+            console.log(`[FLY] Lesson cost: $${lessonDetails.cost}, Current money: $${gameState.stats.money}`);
+            console.log(`[FLY] Weather flying factor: ${currentWeather.flyingFactor} (need > 0.5 to fly)`);
             
             if (gameState.stats.money >= lessonDetails.cost && currentWeather.flyingFactor > 0.5) {
+                console.log('[FLY] ✈️  FLYING - Conditions good, money available');
                 // Weather affects lesson quality
                 const weatherImpact = currentWeather.flyingFactor;
                 const baseKnowledge = 6 + Math.floor(Math.random() * 6);
@@ -1039,10 +1170,12 @@ function takeAction(action) {
                 eventText += `($${lessonDetails.cost} - ${lessonDetails.hours} hours)`;
                 
             } else if (currentWeather.flyingFactor <= 0.5) {
+                console.log('[FLY] ❌ WEATHER CANCEL - Bad weather, doing ground school instead');
                 impact = { morale: -8, knowledge: 3, safety: 0, money: -50 }; // Ground school instead
                 eventText = `${currentWeather.description} canceled your flight lesson. You did ground school instead, but lost the scheduling deposit.`;
                 
             } else {
+                console.log('[FLY] 💸 NO MONEY - Cannot afford lesson');
                 impact = { morale: -12, knowledge: 0, safety: 0, money: 0 };
                 eventText = `You can't afford today's lesson ($${lessonDetails.cost}). Time to find a part-time job or hit the books.`;
             }
@@ -1109,30 +1242,40 @@ function takeAction(action) {
     }
     
     // Apply impacts
+    console.log(`[ACTION] Final impact calculated:`, impact);
+    console.log(`[ACTION] Event text: ${eventText}`);
     applyImpacts(impact);
     
     // Add to logbook
     addLogbookEntry(action, impact.hours || 0, Math.abs(impact.money) || 0);
     
-    // Advance day
+    // Advance day and update week for compatibility
     gameState.day++;
+    gameState.week = Math.ceil(gameState.day / 7);
+    console.log(`[ACTION] Advanced to Day ${gameState.day}`);
     
     // Update phase if conditions met
     updatePhase();
     
     // Check win/lose conditions
+    console.log(`[ACTION] About to check end conditions...`);
     checkEndConditions();
+    console.log(`[ACTION] End conditions check complete. Game ended: ${gameState.gameEnded}`);
     
     // Auto-save game progress (unless game ended)
     if (!gameState.gameEnded) {
         saveGame();
+        console.log(`[ACTION] Game saved`);
     } else {
+        console.log(`[ACTION] Skipping save - game has ended`);
     }
     
     // Update display
+    console.log(`[ACTION] Updating display...`);
     updateDisplay();
     showWeeklyEvent(eventText, impact);
     updateLogbook();
+    console.log(`[ACTION] === ACTION COMPLETE ===`);
 }
 
 // Check for fatigue-related effects and burnout
@@ -1277,9 +1420,14 @@ function updatePhase() {
 function checkEndConditions() {
     const stats = gameState.stats;
     
+    console.log(`[DEBUG] === CHECKING END CONDITIONS - Day ${gameState.day} ===`);
+    console.log(`[DEBUG] Money: $${stats.money}, Morale: ${stats.morale}%, Fatigue: ${stats.fatigue}%`);
+    console.log(`[DEBUG] Safety: ${stats.safety}%, Hours: ${stats.flightHours}, Progress: ${stats.progress}%`);
+    console.log(`[DEBUG] Knowledge: ${stats.knowledge}%`);
     
     // Win condition - PPL obtained
     if (stats.flightHours >= 40 && stats.knowledge >= 85 && stats.safety >= 80 && stats.progress >= 95) {
+        console.log('[ENDING] ✅ SUCCESS: PPL requirements met!');
         endGame('success', `Congratulations! You've earned your Private Pilot License! 
                             Total time: ${gameState.day} days
                             Flight hours: ${stats.flightHours.toFixed(1)}
@@ -1289,6 +1437,7 @@ function checkEndConditions() {
     
     // Lose conditions
     if (gameState.day >= 365) {
+        console.log('[ENDING] ❌ TIMEOUT: Reached 1-year limit');
         endGame('timeout', `Time's up! You've reached the 1-year limit without completing your PPL. 
                            You got to ${stats.progress}% completion with ${stats.flightHours.toFixed(1)} hours logged.
                            Don't give up - many pilots take longer than expected!`);
@@ -1296,56 +1445,74 @@ function checkEndConditions() {
     }
     
     if (stats.money <= 500 && stats.progress < 90) {
+        console.log('[ENDING] ❌ BANKRUPT: Out of money before completion');
         endGame('broke', 'You ran out of money before completing your training. Maybe try a different approach to managing your budget.');
         return;
     }
     
     if (stats.morale <= 0) {
+        console.log('[ENDING] ❌ BURNOUT: Morale hit zero');
         endGame('burnout', 'Your motivation hit rock bottom. Flying is supposed to be fun! Take a break and come back when you\'re ready.');
         return;
     }
     
     if (stats.fatigue >= 100) {
+        console.log('[ENDING] ❌ EXHAUSTED: Fatigue maxed out');
         endGame('exhausted', 'You\'re completely exhausted and can no longer safely continue training. Rest and recovery are essential - pushing through extreme fatigue is dangerous in aviation.');
         return;
     }
     
     if (stats.safety <= 30 && stats.flightHours > 15) {
+        console.log('[ENDING] ❌ SAFETY: Safety too low with significant hours');
         endGame('safety', 'Your CFI has grounded you due to safety concerns. Time to go back to the basics.');
         return;
     }
     
     if (gameState.day > 700) {  // About 2 years - very realistic max timeline
+        console.log('[ENDING] ❌ TIME LIMIT: Training took too long');
         endGame('timeout', 'Your training has taken too long and you\'ve lost momentum. Maybe aviation isn\'t for everyone.');
         return;
     }
     
+    console.log('[DEBUG] ✅ No ending conditions met - continuing game');
 }
 
 // End the game with a specific ending
 function endGame(endingType, message) {
+    console.log(`[CRITICAL] ===== GAME ENDING TRIGGERED =====`);
+    console.log(`[CRITICAL] Ending Type: ${endingType}`);
+    console.log(`[CRITICAL] Message: ${message}`);
+    console.log(`[CRITICAL] Game State Before: gameEnded=${gameState.gameEnded}`);
     
     gameState.gameEnded = true;
     gameState.endingType = endingType;
     
+    console.log(`[CRITICAL] Game State After: gameEnded=${gameState.gameEnded}`);
     
     // Show celebration modal for successful completion
     if (endingType === 'success') {
+        console.log('[CRITICAL] Showing celebration modal for success');
         showCelebrationModal();
     } else {
+        console.log('[CRITICAL] Showing game over modal for failure scenario');
+        console.log('[CRITICAL] About to call showGameOverModal()...');
         
         // Show prominent game over modal for failure scenarios
         showGameOverModal(endingType, message);
         
+        console.log('[CRITICAL] showGameOverModal() call completed');
         
         // Disable action buttons with game-ended class for proper styling
         const actionButtons = document.querySelectorAll('.action-btn');
+        console.log(`[CRITICAL] Disabling ${actionButtons.length} action buttons for game end`);
         actionButtons.forEach(btn => {
             btn.disabled = true;
             btn.classList.add('game-ended'); // This triggers the "GAME OVER" CSS
+            console.log(`[CRITICAL] Disabled button: ${btn.textContent || btn.id}`);
         });
     }
     
+    console.log(`[CRITICAL] ===== END GAME FUNCTION COMPLETE =====`);
 }
 
 function getEndingIcon(type) {
@@ -1571,6 +1738,7 @@ function showGameOverModal(endingType, message) {
     };
     
     const mappedType = endingTypeMap[endingType] || 'fatigue';
+    console.log(`[DEBUG] Game ending triggered: ${endingType} -> ${mappedType}`);
     
     showDramaticEnding(mappedType);
 }
@@ -1584,6 +1752,8 @@ function showDramaticEnding(endingType) {
         
         // Validate required DOM elements exist
         if (!modal || !title || !narrativeText || !epilogueText) {
+            console.error('[ERROR] Required DOM elements missing for dramatic ending');
+            console.error('Modal:', modal, 'Title:', title, 'Narrative:', narrativeText, 'Epilogue:', epilogueText);
             
             // Fallback to alert if modal system fails
             alert(`Game Over: ${endingType}\n\nYour training has ended. Please refresh the page to try again.`);
@@ -1594,6 +1764,7 @@ function showDramaticEnding(endingType) {
         const narratives = endingNarratives[endingType] || endingNarratives.fatigue;
         const selectedNarrative = narratives[Math.floor(Math.random() * narratives.length)];
         
+        console.log(`[DEBUG] Selected narrative: ${selectedNarrative.title}`);
         
         // Set title
         title.textContent = selectedNarrative.title;
@@ -1604,6 +1775,7 @@ function showDramaticEnding(endingType) {
             if (element) {
                 element.textContent = value;
             } else {
+                console.warn(`[WARNING] Element not found: ${elementId}`);
             }
         };
         
@@ -1619,11 +1791,13 @@ function showDramaticEnding(endingType) {
         // Show modal - ensure it's visible
         modal.style.display = 'flex';  // Force display first
         modal.classList.add('active');  // Then add active class
+        console.log('[DEBUG] Modal activated - display:', modal.style.display, 'classes:', modal.className);
         
         // Start typewriter effect for narrative
         typewriterEffect(narrativeText, selectedNarrative.text, 30);
         
     } catch (error) {
+        console.error('[CRITICAL] Failed to show dramatic ending:', error);
         // Emergency fallback
         alert(`Game Over!\n\nYour training has ended due to: ${endingType}\n\nRefresh the page to start a new game.`);
     }
@@ -2238,6 +2412,7 @@ function updateDisplay() {
     
     // Add null check for flyBtn
     if (!flyBtn) {
+        console.warn('fly-btn element not found in cache - DOM may not be ready');
         return;
     }
     
@@ -2257,16 +2432,22 @@ function updateDisplay() {
     
     // Debug all action button states
     const actionButtons = document.querySelectorAll('.action-btn');
+    console.log(`[DEBUG] Action button states:`);
     actionButtons.forEach((btn, i) => {
         const btnTitle = btn.querySelector('.btn-title');
         const btnDesc = btn.querySelector('.btn-description');
+        console.log(`[DEBUG] Button ${i} (${btn.id}): title="${btnTitle?.textContent}", disabled=${btn.disabled}, classes="${btn.className}"`);
     });
     
+    console.log('Display update completed successfully');
     
     // Add visual feedback for stat changes
     addVisualFeedback();
     
     } catch (error) {
+        console.error('Error in updateDisplay:', error);
+        console.error('GameState at error:', gameState);
+        console.error('Cached elements:', cachedElements);
     }
 }
 
@@ -2297,7 +2478,7 @@ function showActionResult(actionType, success = true) {
 }
 
 // Progress Celebration
-function animateMilestoneElement(milestone) {
+function celebrateMilestone(milestone) {
     const milestoneEl = document.getElementById(`milestone-${milestone}`);
     if (milestoneEl) {
         milestoneEl.classList.add('progress-celebration');
@@ -2315,6 +2496,7 @@ function updateGauge(statName, value, prefix = '', isCurrency = false, decimals 
     
     // Validate input value
     if (value === null || value === undefined || isNaN(value)) {
+        console.warn(`Invalid value for ${statName}: ${value}, using 0 as fallback`);
         value = 0;
     }
     
@@ -2323,6 +2505,7 @@ function updateGauge(statName, value, prefix = '', isCurrency = false, decimals 
     
     // Add null checks with detailed logging
     if (!valueEl || !instrumentEl || (needsNeedle && !needleEl)) {
+        console.warn(`Cannot update gauge ${statName} - missing DOM elements:`, {
             value: !!valueEl,
             needle: needsNeedle ? !!needleEl : 'not required', 
             instrument: !!instrumentEl
@@ -2396,6 +2579,7 @@ function updateGauge(statName, value, prefix = '', isCurrency = false, decimals 
     if (needleEl && statName !== 'safety') {
         // Ensure needleRotation is valid before using
         if (isNaN(needleRotation)) {
+            console.warn(`NaN needleRotation for ${statName}, using 0`);
             needleRotation = 0;
         }
         
@@ -2562,8 +2746,10 @@ function saveGame() {
             version: '1.0'
         };
         localStorage.setItem('ppl_simulator_save', JSON.stringify(saveData));
+        console.log('Game saved successfully');
         return true;
     } catch (error) {
+        console.error('Failed to save game:', error);
         return false;
     }
 }
@@ -2593,9 +2779,11 @@ function loadGame() {
         updateDisplay();
         updateLogbook();
         
+        console.log('Game loaded successfully from:', parsed.timestamp);
         alert('Game loaded successfully!');
         return true;
     } catch (error) {
+        console.error('Failed to load game:', error);
         alert('Failed to load saved game!');
         return false;
     }
@@ -2741,6 +2929,7 @@ function getAvailableActions() {
     // CRITICAL FIX: Ensure basic actions are always available as fallback
     // If no actions were found, provide basic Study/Fly/Rest options
     if (actions.length === 0) {
+        console.log('No dynamic actions available, falling back to basic actions');
         actions.push(
             {
                 id: 'study',
@@ -2979,6 +3168,7 @@ function updateActionButtons() {
     
     // Legacy dynamic button creation - only if static buttons don't exist (fallback)
     if (!studyBtn || !flyBtn || !restBtn) {
+        console.log('Static buttons missing, creating dynamic buttons as fallback');
         // Clear and create dynamic buttons only if static ones are missing
         actionContainer.innerHTML = '';
         
@@ -3060,6 +3250,7 @@ function updateStaticButton(button, actionType) {
             cost = lessonCost.cost;
             available = stats.money >= cost && weather.flyingFactor > 0; // Can afford and weather allows
             description = available ? `Book lesson ($${cost})` : (stats.money < cost ? `Need $${cost}` : 'Weather too bad');
+            console.log(`[BUTTON] updateStaticButton FLY: money=$${stats.money}, cost=$${cost}, weather=${weather.flyingFactor}, available=${available}`);
             break;
             
         case 'rest':
@@ -3200,8 +3391,9 @@ function takeDynamicAction(action) {
     // Add to logbook
     addLogbookEntry(action.title, impact.hours || 0, Math.abs(impact.money) || 0);
     
-    // Advance day
+    // Advance day and update week for compatibility
     gameState.day++;
+    gameState.week = Math.ceil(gameState.day / 7);
     
     // Update phase if conditions met
     updatePhase();
@@ -3586,8 +3778,11 @@ function verifyModalElements() {
     });
     
     if (missingElements.length > 0) {
+        console.error('[CRITICAL] Missing required DOM elements:', missingElements);
+        console.error('The dramatic ending system may not function properly.');
         return false;
     } else {
+        console.log('[INFO] All modal elements verified successfully');
         return true;
     }
 }
