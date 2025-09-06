@@ -925,10 +925,6 @@ function cacheDOMElements() {
         const needsNeedle = !['safety', 'progress'].includes(stat);
         
         if (!valueEl || !instrumentEl || (needsNeedle && !needleEl)) {
-                value: !!valueEl,
-                needle: needsNeedle ? !!needleEl : 'not required',
-                instrument: !!instrumentEl
-            });
             return; // Skip this stat but continue with others
         }
         
@@ -947,11 +943,7 @@ function cacheDOMElements() {
     cachedElements.flyBtn = document.getElementById('fly-btn'); 
     cachedElements.restBtn = document.getElementById('rest-btn');
     
-    // Log cached button elements for debugging
-        study: !!cachedElements.studyBtn,
-        fly: !!cachedElements.flyBtn,
-        rest: !!cachedElements.restBtn
-    });
+    // Button elements are now cached
     cachedElements.eventWeek = document.querySelector('.event-week');
     cachedElements.eventType = document.querySelector('.event-type');
     cachedElements.eventImpact = document.getElementById('event-impact');
@@ -2321,12 +2313,8 @@ function updateGauge(statName, value, prefix = '', isCurrency = false, decimals 
     // For safety and progress, check if needle element is expected
     const needsNeedle = !['safety', 'progress'].includes(statName);
     
-    // Add null checks with detailed logging
+    // Add null checks
     if (!valueEl || !instrumentEl || (needsNeedle && !needleEl)) {
-            value: !!valueEl,
-            needle: needsNeedle ? !!needleEl : 'not required', 
-            instrument: !!instrumentEl
-        });
         return;
     }
     
