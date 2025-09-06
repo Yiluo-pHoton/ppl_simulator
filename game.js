@@ -1,4 +1,6 @@
-// PPL Simulator - Game Engine
+// PPL Simulator - Game Engine v2.0
+// Professional Aviation Training Simulator - Professional Styling Applied
+// Version: 2025-01-06_1025 - Professional styling and deployment verification implemented
 // A quirky text-based Private Pilot License training simulator
 
 // Game State
@@ -115,7 +117,7 @@ const weatherConditions = {
     windy: { description: 'High winds', flyingFactor: 0.6, moraleBonus: -5 }
 };
 
-// Dynamic lesson cost calculation
+// Realistic lesson cost calculation - simplified for accuracy
 function calculateLessonCost() {
     // Dynamic aircraft selection based on phase and availability
     const selectedAircraft = selectAircraft();
@@ -125,45 +127,41 @@ function calculateLessonCost() {
     // Base lesson time varies by phase and lesson type
     let baseHours = calculateLessonDuration();
     
-    // Cost components
-    const aircraftCost = selectedAircraft.hourlyRate * baseHours;
-    const instructorCost = selectedInstructor.rate * baseHours;
+    // REALISTIC COST STRUCTURE:
+    // Aircraft rental: $150-200/hour (Hobbs time)
+    // CFI: $50-100/hour (typically 2 hours total lesson time)
+    // Additional costs: $15-50 for fuel, fees, etc.
     
-    // Additional realistic cost factors
+    // Core costs only - no excessive multipliers
+    const aircraftCost = selectedAircraft.hourlyRate * baseHours;
+    const instructorCost = selectedInstructor.rate * 2.0; // Fixed 2-hour lesson block
+    
+    // Minimal additional costs
     const costs = {
         aircraft: aircraftCost,
         instructor: instructorCost,
         fuel: calculateFuelCosts(baseHours, selectedAircraft),
-        groundTime: calculateGroundTime(selectedInstructor),
-        weatherDelay: calculateWeatherDelay(currentWeather),
-        airportFees: calculateAirportFees(),
-        equipmentRental: calculateEquipmentRental(),
-        seasonalAdjustment: calculateSeasonalAdjustment(),
-        demandSurcharge: calculateDemandSurcharge()
+        misc: 15 + Math.floor(Math.random() * 25) // Airport fees, small extras: $15-40
     };
     
-    // Apply market and regional adjustments
-    const regionalMultiplier = getRegionalMultiplier();
-    const marketAdjustment = calculateMarketAdjustment();
+    // Calculate total without excessive multipliers
+    const subtotal = Object.values(costs).reduce((sum, cost) => sum + cost, 0);
     
-    // Calculate subtotal with adjustments
-    let subtotal = Object.values(costs).reduce((sum, cost) => sum + cost, 0);
-    subtotal *= regionalMultiplier * marketAdjustment;
+    // Small random variation (±5%) instead of complex regional/market adjustments
+    const variation = 0.95 + (Math.random() * 0.1); // 95% to 105%
+    const totalCost = Math.floor(subtotal * variation);
     
-    // Add taxes
-    const taxRate = 0.087; // Realistic tax rate for aviation services
-    const taxes = Math.floor(subtotal * taxRate);
-    const totalCost = Math.floor(subtotal + taxes);
+    // Ensure costs stay in realistic range: $300-550 for typical lessons
+    const cappedCost = Math.min(Math.max(totalCost, 280), 550);
     
     return {
-        cost: totalCost,
+        cost: cappedCost,
         hours: Math.round(baseHours * 10) / 10,
         aircraft: selectedAircraft,
         instructor: selectedInstructor,
         breakdown: {
             ...costs,
-            taxes: taxes,
-            total: totalCost
+            total: cappedCost
         }
     };
 }
@@ -248,84 +246,55 @@ function calculateLessonDuration() {
 }
 
 function calculateFuelCosts(hours, aircraft) {
-    // Realistic fuel consumption and pricing
+    // Simplified fuel cost - often included in aircraft rental
+    // Only charge extra fuel for longer lessons
     const fuelBurnRates = {
         'Cessna 152': 6.0, // GPH
         'Cessna 172': 8.5, // GPH
         'Cherokee 140': 7.8 // GPH
     };
     
-    const currentFuelPrice = 5.50 + (Math.random() * 0.60); // $5.50-$6.10/gal (realistic avgas pricing)
+    // Lower fuel pricing since often included in wet rates
+    const fuelPrice = 6.00; // Fixed price for simplicity
     const burnRate = fuelBurnRates[aircraft.name] || 7.0;
     const fuelUsed = hours * burnRate;
     
-    return Math.floor(fuelUsed * currentFuelPrice);
+    // Most flight schools charge "wet" rates (fuel included)
+    // Only add fuel surcharge for long lessons
+    return hours > 2.0 ? Math.floor(fuelUsed * fuelPrice * 0.3) : 0;
 }
 
 function calculateGroundTime(instructor) {
-    // Pre/post flight briefing costs
-    const briefingTime = 0.3 + (Math.random() * 0.2); // 20-30 minutes
-    return Math.floor(briefingTime * instructor.rate);
+    // Ground time now included in instructor rate - no extra charge
+    return 0;
 }
 
 function calculateWeatherDelay(weather) {
-    // Weather delays cost money due to scheduling and potential rescheduling fees
-    if (weather.flyingFactor < 0.6) {
-        return Math.random() < 0.3 ? 25 + Math.floor(Math.random() * 25) : 0;
-    }
+    // Weather delays rarely incur extra costs - most schools absorb this
     return 0;
 }
 
 function calculateAirportFees() {
-    // Landing fees, ramp fees, etc.
-    const baseFee = 15 + Math.floor(Math.random() * 10); // $15-25
-    return Math.random() < 0.7 ? baseFee : 0; // Not all airports charge
-}
-
-function calculateEquipmentRental() {
-    // Charts, headset rental, etc.
-    const stats = gameState.stats;
-    
-    // New students need more equipment
-    if (stats.flightHours < 10) {
-        return Math.random() < 0.4 ? 10 + Math.floor(Math.random() * 15) : 0;
-    }
-    
-    return Math.random() < 0.1 ? 8 : 0; // Occasional equipment needs
-}
-
-function calculateSeasonalAdjustment() {
-    // Summer is peak training season (higher costs)
-    // Winter has fewer students (lower costs)
-    const dayOfYear = gameState.day % 365;
-    const summerPeak = dayOfYear >= 120 && dayOfYear <= 240; // May-August
-    const winterLow = dayOfYear >= 330 || dayOfYear <= 60; // Nov-Feb
-    
-    if (summerPeak) {
-        return Math.floor((Math.random() * 20) + 10); // $10-30 summer surcharge
-    } else if (winterLow) {
-        return -Math.floor(Math.random() * 15); // Up to $15 discount
-    }
-    
-    return Math.floor((Math.random() * 10) - 5); // ±$5 variation
-}
-
-function calculateDemandSurcharge() {
-    // High demand periods (weekends, good weather) cost more
-    const currentWeather = getWeeklyWeather();
-    const isWeekend = gameState.day % 7 >= 5; // Sat/Sun
-    const goodWeather = currentWeather.flyingFactor > 0.8;
-    
-    if (isWeekend && goodWeather) {
-        return Math.floor(Math.random() * 25) + 15; // $15-40 weekend premium
-    } else if (isWeekend || goodWeather) {
-        return Math.floor(Math.random() * 15) + 5; // $5-20 moderate premium
-    }
-    
+    // Most training airports don't charge landing fees for training flights
     return 0;
 }
 
-// Enhanced cost transparency system
+function calculateEquipmentRental() {
+    // Equipment costs now included in base lesson rates
+    return 0;
+}
+
+function calculateSeasonalAdjustment() {
+    // Seasonal pricing removed for realistic training costs
+    return 0;
+}
+
+function calculateDemandSurcharge() {
+    // Demand surcharges removed for realistic training costs
+    return 0;
+}
+
+// Simplified cost transparency system
 function generateCostBreakdownText(lessonDetails) {
     const breakdown = lessonDetails.breakdown;
     const majorCosts = [];
@@ -333,17 +302,8 @@ function generateCostBreakdownText(lessonDetails) {
     majorCosts.push(`Aircraft (${lessonDetails.aircraft.name}): $${Math.floor(breakdown.aircraft)}`);
     majorCosts.push(`Instructor (${lessonDetails.instructor.name}): $${Math.floor(breakdown.instructor)}`);
     
-    if (breakdown.fuel > 0) majorCosts.push(`Fuel: $${Math.floor(breakdown.fuel)}`);
-    if (breakdown.groundTime > 0) majorCosts.push(`Ground time: $${Math.floor(breakdown.groundTime)}`);
-    if (breakdown.weatherDelay > 0) majorCosts.push(`Weather delays: $${Math.floor(breakdown.weatherDelay)}`);
-    if (breakdown.airportFees > 0) majorCosts.push(`Airport fees: $${Math.floor(breakdown.airportFees)}`);
-    if (breakdown.equipmentRental > 0) majorCosts.push(`Equipment: $${Math.floor(breakdown.equipmentRental)}`);
-    if (Math.abs(breakdown.seasonalAdjustment) > 0) {
-        const adj = breakdown.seasonalAdjustment > 0 ? `+$${Math.floor(breakdown.seasonalAdjustment)}` : `-$${Math.floor(Math.abs(breakdown.seasonalAdjustment))}`;
-        majorCosts.push(`Seasonal adjustment: ${adj}`);
-    }
-    if (breakdown.demandSurcharge > 0) majorCosts.push(`Peak demand: $${Math.floor(breakdown.demandSurcharge)}`);
-    if (breakdown.taxes > 0) majorCosts.push(`Taxes: $${Math.floor(breakdown.taxes)}`);
+    if (breakdown.fuel > 0) majorCosts.push(`Extra fuel: $${Math.floor(breakdown.fuel)}`);
+    if (breakdown.misc > 0) majorCosts.push(`Fees & misc: $${Math.floor(breakdown.misc)}`);
     
     return majorCosts.join(', ');
 }
@@ -1284,6 +1244,11 @@ function takeAction(action) {
     // Check win/lose conditions
     checkEndConditions();
     
+    // Auto-save game progress (unless game ended)
+    if (!gameState.gameEnded) {
+        saveGame();
+    }
+    
     // Update display
     updateDisplay();
     showWeeklyEvent(eventText, impact);
@@ -1492,19 +1457,8 @@ function endGame(endingType, message) {
     if (endingType === 'success') {
         showCelebrationModal();
     } else {
-        // Show regular ending display for other outcomes
-        const eventCard = document.getElementById('event-card');
-        eventCard.innerHTML = `
-            <div class="event-header">
-                <span class="event-week">GAME OVER</span>
-                <span class="event-type">${getEndingIcon(endingType)} ${getEndingTitle(endingType)}</span>
-            </div>
-            <div class="event-content">${message}</div>
-            <div class="event-stats">
-                Final Stats - Days: ${gameState.day} | Hours: ${gameState.stats.flightHours.toFixed(1)} | 
-                Spent: $${gameState.totalSpent.toLocaleString()} | Progress: ${gameState.stats.progress}%
-            </div>
-        `;
+        // Show prominent game over modal for failure scenarios
+        showGameOverModal(endingType, message);
         
         // Disable action buttons
         document.querySelectorAll('.action-btn').forEach(btn => btn.disabled = true);
@@ -1598,6 +1552,204 @@ function closeCelebration() {
     modal.style.display = 'none';
 }
 
+// Game Over Modal Functions
+function showGameOverModal(endingType, message) {
+    const modal = document.getElementById('gameover-modal');
+    const title = document.getElementById('gameover-title');
+    const subtitle = document.getElementById('gameover-subtitle');
+    const icon = document.getElementById('gameover-icon');
+    const messageElement = document.getElementById('gameover-message');
+    const reason = document.getElementById('gameover-reason');
+    
+    // Set content based on ending type
+    const endingData = getEndingData(endingType);
+    title.textContent = 'GAME OVER';
+    subtitle.textContent = endingData.title;
+    icon.textContent = endingData.icon;
+    messageElement.textContent = message;
+    reason.textContent = endingData.reason;
+    
+    // Update stats
+    document.getElementById('gameover-days').textContent = gameState.day;
+    document.getElementById('gameover-hours').textContent = gameState.stats.flightHours.toFixed(1);
+    document.getElementById('gameover-spent').textContent = `$${gameState.totalSpent.toLocaleString()}`;
+    document.getElementById('gameover-progress').textContent = `${gameState.stats.progress}%`;
+    
+    // Check if save exists for load button
+    const loadBtn = document.getElementById('load-game-btn');
+    const hasSave = localStorage.getItem('ppl_simulator_save');
+    loadBtn.style.display = hasSave ? 'block' : 'none';
+    
+    // Show modal
+    modal.style.display = 'flex';
+}
+
+function closeGameOver() {
+    const modal = document.getElementById('gameover-modal');
+    modal.style.display = 'none';
+}
+
+function getEndingData(endingType) {
+    const endings = {
+        exhausted: {
+            title: 'Exhaustion Grounding',
+            icon: '😴',
+            reason: 'Fatigue reached dangerous levels - you cannot safely continue training.'
+        },
+        broke: {
+            title: 'Financial Grounding', 
+            icon: '💸',
+            reason: 'Insufficient funds to continue training. Budget management is crucial for pilot training.'
+        },
+        burnout: {
+            title: 'Motivation Failure',
+            icon: '😞', 
+            reason: 'Morale dropped to zero - the mental aspect of flying is as important as the technical skills.'
+        },
+        safety: {
+            title: 'Safety Violation',
+            icon: '⚠️',
+            reason: 'Safety standards fell too low. Your CFI has grounded you for additional training.'
+        },
+        timeout: {
+            title: 'Training Expired',
+            icon: '⏰',
+            reason: 'Training took too long and momentum was lost. Consistency is key in aviation.'
+        }
+    };
+    return endings[endingType] || {
+        title: 'Training Terminated',
+        icon: '✈️',
+        reason: 'Training has ended.'
+    };
+}
+
+// Fatigue Warning System
+let lastFatigueWarning = 0; // Track last warning level to avoid spam
+
+function checkFatigueWarnings(fatigue) {
+    const fatigueInstrument = document.getElementById('fatigue-instrument');
+    
+    // Remove existing warning classes
+    fatigueInstrument.classList.remove('fatigue-warning', 'fatigue-critical');
+    
+    if (fatigue >= 90 && lastFatigueWarning < 90) {
+        // Critical warning
+        fatigueInstrument.classList.add('fatigue-critical');
+        showFatigueAlert('CRITICAL FATIGUE!', 
+            'You are dangerously exhausted! Take immediate rest or your training will be terminated for safety reasons.', 
+            'critical');
+        lastFatigueWarning = 90;
+    } else if (fatigue >= 80 && lastFatigueWarning < 80) {
+        // High warning
+        fatigueInstrument.classList.add('fatigue-warning');
+        showFatigueAlert('HIGH FATIGUE WARNING', 
+            'Your fatigue levels are getting dangerous. Consider taking a rest day to avoid exhaustion.', 
+            'warning');
+        lastFatigueWarning = 80;
+    } else if (fatigue < 80) {
+        // Reset warning level when fatigue drops
+        lastFatigueWarning = 0;
+    }
+}
+
+function showFatigueAlert(title, message, type) {
+    // Create floating alert that doesn't block gameplay but is very visible
+    const alert = document.createElement('div');
+    alert.className = `fatigue-alert ${type}`;
+    alert.innerHTML = `
+        <div class="alert-header">
+            <span class="alert-icon">${type === 'critical' ? '🚨' : '⚠️'}</span>
+            <span class="alert-title">${title}</span>
+        </div>
+        <div class="alert-message">${message}</div>
+    `;
+    
+    // Add styles directly to avoid dependency on CSS order
+    alert.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 300px;
+        background: ${type === 'critical' ? 'linear-gradient(135deg, #e74c3c, #c0392b)' : 'linear-gradient(135deg, #f39c12, #e67e22)'};
+        color: white;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        font-family: 'Kalam', cursive;
+        animation: ${type === 'critical' ? 'fatigueAlertPulse' : 'fatigueAlertSlide'} 0.5s ease-out;
+        border: 3px solid ${type === 'critical' ? '#ff6b6b' : '#f1c40f'};
+    `;
+    
+    document.body.appendChild(alert);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.style.animation = 'fatigueAlertFadeOut 0.5s ease-out forwards';
+            setTimeout(() => alert.remove(), 500);
+        }
+    }, 5000);
+}
+
+// Add CSS animations for fatigue alerts dynamically
+if (!document.getElementById('fatigue-alert-styles')) {
+    const style = document.createElement('style');
+    style.id = 'fatigue-alert-styles';
+    style.textContent = `
+        @keyframes fatigueAlertSlide {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fatigueAlertPulse {
+            0% { transform: translateX(100%) scale(0.9); opacity: 0; }
+            50% { transform: translateX(0) scale(1.05); opacity: 1; }
+            100% { transform: translateX(0) scale(1); opacity: 1; }
+        }
+        
+        @keyframes fatigueAlertFadeOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        
+        .fatigue-alert .alert-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .fatigue-alert .alert-icon {
+            font-size: 1.2rem;
+        }
+        
+        .fatigue-alert .alert-message {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .fatigue-instrument.fatigue-warning {
+            border-color: #f39c12 !important;
+            box-shadow: 0 0 15px rgba(243, 156, 18, 0.5) !important;
+        }
+        
+        .fatigue-instrument.fatigue-critical {
+            border-color: #e74c3c !important;
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.7) !important;
+            animation: fatigueInstrumentPulse 1s ease-in-out infinite alternate;
+        }
+        
+        @keyframes fatigueInstrumentPulse {
+            from { box-shadow: 0 0 20px rgba(231, 76, 60, 0.7); }
+            to { box-shadow: 0 0 30px rgba(231, 76, 60, 1); }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
 // Check if tutorial should be shown on load
 function checkTutorial() {
     const tutorialSeen = localStorage.getItem('ppl_tutorial_seen');
@@ -1651,6 +1803,9 @@ function updateDisplay() {
     updateGauge('hours', stats.flightHours, '', false, 1);
     updateGauge('fatigue', stats.fatigue);
     updateGauge('progress', stats.progress);
+    
+    // Check for fatigue warnings
+    checkFatigueWarnings(stats.fatigue);
     
     // Update milestone tracker
     updateMilestoneTracker();
@@ -1983,6 +2138,62 @@ function updateLogbook() {
 }
 
 // Save/Load functionality removed - Game is designed as a single session experience
+
+// Save/Load Game Functions
+function saveGame() {
+    try {
+        const saveData = {
+            gameState: gameState,
+            timestamp: new Date().toISOString(),
+            version: '1.0'
+        };
+        localStorage.setItem('ppl_simulator_save', JSON.stringify(saveData));
+        console.log('Game saved successfully');
+        return true;
+    } catch (error) {
+        console.error('Failed to save game:', error);
+        return false;
+    }
+}
+
+function loadGame() {
+    try {
+        const saveData = localStorage.getItem('ppl_simulator_save');
+        if (!saveData) {
+            alert('No saved game found!');
+            return false;
+        }
+        
+        const parsed = JSON.parse(saveData);
+        if (!parsed.gameState) {
+            alert('Invalid save file!');
+            return false;
+        }
+        
+        // Restore game state
+        gameState = parsed.gameState;
+        
+        // Re-enable buttons if game wasn't ended
+        const buttons = document.querySelectorAll('.action-btn');
+        buttons.forEach(btn => btn.disabled = gameState.gameEnded);
+        
+        // Update display
+        updateDisplay();
+        updateLogbook();
+        
+        console.log('Game loaded successfully from:', parsed.timestamp);
+        alert('Game loaded successfully!');
+        return true;
+    } catch (error) {
+        console.error('Failed to load game:', error);
+        alert('Failed to load saved game!');
+        return false;
+    }
+}
+
+function hasSavedGame() {
+    return localStorage.getItem('ppl_simulator_save') !== null;
+}
 
 function resetGame() {
     if (confirm('Are you sure you want to start a new game? This will delete your current progress.')) {
