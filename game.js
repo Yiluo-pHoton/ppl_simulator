@@ -1502,11 +1502,12 @@ function endGame(endingType, message) {
         
         console.log('[CRITICAL] showGameOverModal() call completed');
         
-        // Disable action buttons
+        // Disable action buttons with game-ended class for proper styling
         const actionButtons = document.querySelectorAll('.action-btn');
-        console.log(`[CRITICAL] Disabling ${actionButtons.length} action buttons`);
+        console.log(`[CRITICAL] Disabling ${actionButtons.length} action buttons for game end`);
         actionButtons.forEach(btn => {
             btn.disabled = true;
+            btn.classList.add('game-ended'); // This triggers the "GAME OVER" CSS
             console.log(`[CRITICAL] Disabled button: ${btn.textContent || btn.id}`);
         });
     }

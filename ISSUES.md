@@ -8,21 +8,121 @@
 
 ## 🚨 Critical Issues
 
-### 1. Silent Game Over Bug (HIGH PRIORITY)
+### 1. Visual "GAME OVER" Button Bug (HIGH PRIORITY)
 
-**Status**: 🔴 UNRESOLVED  
+**Status**: 🔴 DEBUGGING IN PROGRESS  
 **Severity**: Critical  
-**Impact**: User Experience, Game Completion  
+**Impact**: User Experience, Visual Interface  
 
 #### Problem Description
-The game terminates silently when certain conditions are met (particularly fatigue reaching 100%), providing no clear indication to the player about why their training ended. This creates a frustrating user experience where players suddenly find the game unresponsive without understanding the reason.
+The fly button incorrectly shows "GAME OVER" overlay even when the game is running normally. Debug logs show the game continues properly (Day 27, no end conditions met), but CSS rule `.action-btn:disabled::before { content: 'GAME OVER'; }` displays on any disabled button.
+
+#### Debug Evidence (2025-01-06)
+```
+[DEBUG] === CHECKING END CONDITIONS - Day 27 ===
+[DEBUG] Money: $7730, Morale: 100%, Fatigue: 48%
+[DEBUG] Safety: 100%, Hours: 27.7, Progress: 100%
+[DEBUG] ✅ No ending conditions met - continuing game
+[ACTION] End conditions check complete. Game ended: false
+[BUTTON] updateStaticButton FLY: money=$7730, cost=$462, weather=0, available=false
+[DEBUG] Button 1 (fly-btn): title="Schedule Flight", disabled=true
+```
 
 #### Root Cause Analysis
-- **Primary Issue**: Modal display system inconsistency
-- **Code Location**: `game.js:1427-1430` - Fatigue check in `checkEndConditions()`
-- **Triggering Condition**: `stats.fatigue >= 100`
-- **Expected Behavior**: Show dramatic game over modal with explanation
-- **Actual Behavior**: Game ends silently, buttons become disabled, no modal appears
+- **Primary Issue**: IFR conditions (`weather=0`) disable fly button via `weather.flyingFactor > 0` check
+- **Secondary Issue**: CSS shows "GAME OVER" on ANY disabled button, even for weather
+- **Logic Issue**: Button availability logic too strict for weather conditions
+
+---
+
+### 2. Weather System Too Predictable (MEDIUM PRIORITY)
+
+**Status**: 🔴 IDENTIFIED  
+**Severity**: Medium  
+**Impact**: Gameplay Balance, Realism  
+
+#### Problem Description
+Weather patterns are too repetitive with too many VFR (clear) conditions in a row. Real flight training experiences more weather delays and variety.
+
+#### Current Issues
+- Excessive clear weather days back-to-back
+- IFR conditions rare but when they occur, completely disable flying
+- Missing intermediate conditions (marginal VFR, MVFR)
+- No weather trends or seasonal patterns
+
+#### Suggested Improvements
+- More realistic weather frequency (30% clear, 40% marginal, 20% poor, 10% IFR)
+- Weather trends over multiple days
+- Regional weather patterns
+- Seasonal variations
+
+---
+
+### 3. Non-Functional Gauge Animations (MEDIUM PRIORITY)
+
+**Status**: 🔴 IDENTIFIED  
+**Severity**: Medium  
+**Impact**: Visual Polish, User Experience  
+
+#### Problem Description
+Gauge needles don't move during gameplay - they only update on page load/refresh. The gauges appear static despite stat changes.
+
+#### Current Behavior
+- Needles show correct values on initial page load
+- No animation during stat updates (money, fatigue, progress changes)
+- Gauges appear "frozen" during gameplay
+
+#### Expected Behavior
+- Smooth needle transitions when stats change
+- Real-time gauge updates during actions
+- Animation feedback for stat changes
+
+---
+
+### 4. Unclear Progress Metric (LOW PRIORITY)
+
+**Status**: 🔴 IDENTIFIED  
+**Severity**: Low  
+**Impact**: User Understanding  
+
+#### Problem Description
+Progress gauge shows 100% but game continues. Unclear what "progress" measures and why game doesn't end at 100%.
+
+#### Debug Evidence
+```
+[DEBUG] Safety: 100%, Hours: 27.7, Progress: 100%
+[DEBUG] Knowledge: 100%
+[DEBUG] ✅ No ending conditions met - continuing game
+```
+
+#### Questions
+- What does "progress" actually measure?
+- Why doesn't game end at 100% progress?
+- Should this be "Training Completion" instead?
+- How does this relate to PPL requirements (40 hours, checkride, etc.)?
+
+---
+
+## 🔧 Immediate Fixes Needed
+
+### Fix #1: CSS "GAME OVER" Text (5 minutes)
+**Problem**: CSS shows "GAME OVER" on any disabled button
+**Solution**: Change CSS to show weather-specific text for weather-disabled buttons
+
+```css
+/* Instead of generic "GAME OVER" on all disabled buttons */
+.action-btn:disabled::before {
+    content: 'WEATHER CANCEL';  /* More appropriate for weather issues */
+}
+```
+
+### Fix #2: Weather Button Logic (10 minutes)  
+**Problem**: `weather.flyingFactor > 0` disables button for IFR (0.0)
+**Solution**: Allow ground school option in bad weather instead of complete disable
+
+### Fix #3: Gauge Animation Update (30 minutes)
+**Problem**: Needles don't animate during stat changes
+**Solution**: Call gauge update function after each stat modification
 
 #### Technical Details
 ```javascript

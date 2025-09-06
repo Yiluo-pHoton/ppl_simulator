@@ -1783,7 +1783,13 @@ header h1 {
     transform: scale(0.95);
 }
 
-.action-btn:disabled::before {
+/* Generic disabled state - no overlay text by default */
+.action-btn:disabled {
+    /* Keep existing disabled styles but remove automatic "GAME OVER" text */
+}
+
+/* Only show "GAME OVER" when game has actually ended */
+.action-btn:disabled.game-ended::before {
     content: 'GAME OVER';
     position: absolute;
     top: 50%;
