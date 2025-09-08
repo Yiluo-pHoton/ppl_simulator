@@ -81,15 +81,17 @@
 /* Milestone Modal Styling */
 .milestone-modal-overlay {
     font-family: 'Kalam', cursive;
+    background: rgba(30, 58, 95, 0.95); /* Cockpit blue overlay */
 }
 
 .milestone-modal {
-    background: var(--instrument-beige);
+    background: linear-gradient(135deg, #1e3a5f 0%, #2c4a73 100%); /* Cockpit instrument blue */
+    border: 2px solid #ff6600; /* Aviation orange accent */
     border-radius: 16px;
     padding: 2rem;
     max-width: 500px;
     width: 90%;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 60px rgba(255, 102, 0, 0.2);
     text-align: center;
     position: relative;
 }
@@ -105,15 +107,15 @@
 }
 
 .milestone-title {
-    color: var(--success-green);
+    color: #00cc66; /* Navigation green for success */
     font-size: 1.8rem;
     font-weight: 700;
     margin: 0.5rem 0;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .milestone-message {
-    color: var(--text-dark);
+    color: #f8f9fa; /* Instrument white for readability */
     font-size: 1.1rem;
     margin: 1rem 0;
     line-height: 1.4;
@@ -149,9 +151,9 @@
 }
 
 .milestone-continue-btn {
-    background: var(--success-green);
+    background: linear-gradient(135deg, #00cc66 0%, #00aa55 100%); /* Navigation green gradient */
     color: white;
-    border: none;
+    border: 2px solid rgba(255, 255, 255, 0.2);
     padding: 0.8rem 2rem;
     border-radius: 25px;
     font-size: 1rem;
@@ -159,13 +161,16 @@
     cursor: pointer;
     transition: all 0.3s ease;
     margin-top: 1rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 204, 102, 0.3);
     font-family: inherit;
 }
 
 .milestone-continue-btn:hover {
-    background: #27ae60;
+    background: linear-gradient(135deg, #00dd77 0%, #00bb66 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+    box-shadow: 0 6px 20px rgba(0, 204, 102, 0.5);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* Game Over Modal Enhancements */
@@ -3274,3 +3279,115 @@ footer {
         margin: 10px;
     }
 }/* Cache buster: Sat Sep  6 10:25:31 EDT 2025 */
+
+/* ===== GAUGE ANIMATION ENHANCEMENTS ===== */
+/* Added for Issue #1: Fix gauge animations */
+
+/* Floating stat change indicators - shows +/- values when stats change */
+@keyframes floatUp {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -180%);
+    }
+}
+
+.stat-change-indicator {
+    animation: floatUp 1.5s ease-out forwards;
+    pointer-events: none;
+    position: absolute;
+    font-weight: bold;
+    z-index: 1000;
+}
+
+/* Highlight updated instruments with subtle glow */
+.stat-updated {
+    animation: pulseGlow 0.8s ease-in-out;
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        filter: brightness(1);
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    50% {
+        filter: brightness(1.1);
+        box-shadow: 0 0 25px rgba(255,200,0,0.5), 0 0 35px rgba(255,150,0,0.3);
+    }
+}
+
+/* ===== MILESTONE MODAL COLOR FIX ===== */
+/* Issue #11: Aviation-authentic color scheme */
+
+/* Fix text colors for dark background */
+.milestone-modal .milestone-description,
+.milestone-modal .milestone-subtext,
+.milestone-modal .milestone-label,
+.milestone-modal .milestone-value,
+.milestone-modal .milestone-text,
+.milestone-modal p,
+.milestone-modal span {
+    color: #f8f9fa !important; /* Instrument white */
+}
+
+/* Style the "What's Next" section */
+.milestone-modal .next-section-title,
+.milestone-modal h3 {
+    color: #ff6600 !important; /* Aviation orange for headers */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Progress stat boxes */
+.milestone-progress-item,
+.milestone-stat-box {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 102, 0, 0.3);
+    border-radius: 8px;
+    padding: 0.5rem;
+    color: #f8f9fa;
+}
+
+/* Fix any remaining beige backgrounds */
+.milestone-modal * {
+    background-color: transparent;
+}
+
+/* Ensure modal itself keeps gradient */
+.milestone-modal {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2c4a73 100%) !important;
+}
+
+/* ===== CELEBRATION MODAL COLOR FIX ===== */
+/* Update celebration modal to match aviation theme */
+
+.celebration-modal {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2c4a73 100%) !important;
+    border: 3px solid #00cc66 !important;
+    color: #f8f9fa !important;
+}
+
+.celebration-modal * {
+    color: #f8f9fa !important;
+}
+
+.celebration-header {
+    background: linear-gradient(135deg, #00cc66 0%, #00aa55 100%) !important;
+    border-bottom: 2px solid #ff6600 !important;
+}
+
+/* Fix celebration content colors */
+.celebration-modal .stat-value,
+.celebration-modal .stat-label,
+.celebration-modal p,
+.celebration-modal span {
+    color: #f8f9fa !important;
+}
+
+.celebration-modal h2,
+.celebration-modal h3 {
+    color: #00cc66 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}

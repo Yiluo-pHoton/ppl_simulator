@@ -31,3 +31,15 @@ pids
 # Temporary folders
 tmp/
 temp/
+
+# Test files
+test_*.html
+debug_*.html
+
+# Backup files
+*_backup_*.js
+
+# Documentation drafts
+FIXES_APPLIED.md
+GAMEPLAY_ISSUES.md
+TEST_CHECKLIST.md

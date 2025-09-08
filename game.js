@@ -1191,6 +1191,9 @@ function checkFatigueEffects(projectedFatigue, impact) {
 
 // Apply stat impacts with bounds checking
 function applyImpacts(impact) {
+    // Store old values for animation comparison
+    const oldStats = { ...gameState.stats };
+    
     gameState.stats.morale = Math.max(0, Math.min(100, gameState.stats.morale + impact.morale));
     gameState.stats.knowledge = Math.max(0, Math.min(100, gameState.stats.knowledge + impact.knowledge));
     gameState.stats.safety = Math.max(0, Math.min(100, gameState.stats.safety + impact.safety));
@@ -1209,6 +1212,94 @@ function applyImpacts(impact) {
          gameState.stats.safety * 0.2) / 1.0
     );
     gameState.stats.progress = Math.min(100, gameState.stats.progress);
+    
+    // Add visual feedback for changed stats
+    highlightChangedStats(oldStats, gameState.stats);
+}
+
+// Visual feedback for stat changes
+function highlightChangedStats(oldStats, newStats) {
+    const statNames = ['morale', 'knowledge', 'safety', 'money', 'hours', 'fatigue', 'progress'];
+    
+    statNames.forEach(stat => {
+        const statKey = stat === 'hours' ? 'flightHours' : stat;
+        const oldValue = oldStats[statKey] || 0;
+        const newValue = newStats[statKey] || 0;
+        
+        if (Math.abs(oldValue - newValue) > 0.1) {
+            // Add animation class to the instrument
+            const instrumentEl = document.getElementById(`${stat}-instrument`);
+            if (instrumentEl) {
+                instrumentEl.classList.remove('stat-updated');
+                // Force reflow to restart animation
+                void instrumentEl.offsetWidth;
+                instrumentEl.classList.add('stat-updated');
+                
+                // Remove class after animation completes
+                setTimeout(() => {
+                    instrumentEl.classList.remove('stat-updated');
+                }, 1000);
+            }
+            
+            // Show change indicator (+/- value)
+            showStatChangeIndicator(stat, newValue - oldValue);
+        }
+    });
+}
+
+// Smooth needle animation function
+function animateNeedle(needleEl, fromAngle, toAngle, duration = 800) {
+    if (!needleEl) return;
+    
+    const startTime = performance.now();
+    const angleChange = toAngle - fromAngle;
+    
+    function updateNeedle(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeProgress = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
+        
+        const currentAngle = fromAngle + (angleChange * easeProgress);
+        needleEl.setAttribute('transform', `rotate(${currentAngle} 100 100)`);
+        
+        if (progress < 1) {
+            requestAnimationFrame(updateNeedle);
+        }
+    }
+    
+    requestAnimationFrame(updateNeedle);
+}
+
+// Show floating +/- indicators for stat changes
+function showStatChangeIndicator(statName, change) {
+    const instrumentEl = document.getElementById(`${statName}-instrument`);
+    if (!instrumentEl || Math.abs(change) < 0.1) return;
+    
+    // Create floating indicator
+    const indicator = document.createElement('div');
+    indicator.className = 'stat-change-indicator';
+    indicator.textContent = change > 0 ? `+${Math.round(change)}` : `${Math.round(change)}`;
+    indicator.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.2em;
+        font-weight: bold;
+        color: ${change > 0 ? '#0f0' : '#f00'};
+        text-shadow: 0 0 3px rgba(0,0,0,0.8);
+        pointer-events: none;
+        animation: floatUp 1.5s ease-out forwards;
+        z-index: 1000;
+    `;
+    
+    instrumentEl.style.position = 'relative';
+    instrumentEl.appendChild(indicator);
+    
+    // Remove after animation
+    setTimeout(() => indicator.remove(), 1500);
 }
 
 // Update current training phase based on progress
@@ -2387,20 +2478,25 @@ function updateGauge(statName, value, prefix = '', isCurrency = false, decimals 
             needleRotation = 0;
         }
         
-        // Performance optimization: only update if rotation actually changed
-        const currentTransform = needleEl.getAttribute('transform') || '';
-        const newTransform = `rotate(${needleRotation} 100 100)`;
+        // Round to avoid floating point issues
+        needleRotation = Math.round(needleRotation);
         
-        if (currentTransform !== newTransform) {
-            // Set CSS custom property for animation reference
-            needleEl.style.setProperty('--needle-angle', `${needleRotation}deg`);
-            needleEl.setAttribute('transform', newTransform);
+        // Get current rotation
+        const currentTransform = needleEl.getAttribute('transform') || 'rotate(0 100 100)';
+        const currentMatch = currentTransform.match(/rotate\(([^,\s]+)/);
+        const oldRotation = currentMatch ? parseFloat(currentMatch[1]) : 0;
+        
+        // Only update if rotation actually changed significantly
+        if (Math.abs(needleRotation - oldRotation) > 0.5) {
+            // Animate the needle smoothly
+            animateNeedle(needleEl, oldRotation, needleRotation);
             
-            // Add subtle vibration effect for needle realism (skip for very small changes)
-            const oldRotation = parseFloat(currentTransform.match(/rotate\(([^)]+)/)?.[1] || '0');
+            // Add animation class for large changes
             if (Math.abs(needleRotation - oldRotation) > 5) {
                 needleEl.classList.add('needle-moving');
-                setTimeout(() => needleEl.classList.remove('needle-moving'), 800);
+                setTimeout(() => {
+                    if (needleEl) needleEl.classList.remove('needle-moving');
+                }, 800);
             }
         }
     }
@@ -2595,17 +2691,69 @@ function hasSavedGame() {
 
 function resetGame() {
     if (confirm('Are you sure you want to start a new game? This will delete your current progress.')) {
+        // Reset to complete initial state
         gameState = {
             day: 1,
             phase: 'Ground School',
+            currentWeather: null,
+            
+            // Skills system
+            skills: {
+                groundKnowledge: 30,
+                cockpitSkills: 10,
+                radioWork: 5,
+                weatherReading: 15,
+                navigation: 5,
+                emergencyProcs: 20
+            },
+            
+            // Stats for UI
             stats: {
                 morale: 75,
                 knowledge: 30,
                 safety: 80,
                 money: 15000,
                 flightHours: 0.0,
-                progress: 0
+                progress: 0,
+                fatigue: 0  // This was missing!
             },
+            
+            // Instructor
+            instructor: {
+                name: 'John Peterson',
+                quality: 0.9,
+                relationship: 75,
+                rate: 65,
+                availability: 0.8,
+                style: 'thorough',
+                changedCount: 0
+            },
+            
+            // Finances
+            finances: {
+                totalSpent: 0,
+                budgetOverrun: 0,
+                hiddenCosts: 0,
+                equipmentCosts: 0,
+                testCosts: 0,
+                maintenanceCosts: 0
+            },
+            
+            // Failures
+            failures: {
+                writtenAttempts: 0,
+                checkrideAttempts: 0,
+                instructorChanges: 0,
+                weatherCancellations: 0,
+                medicalIssues: 0,
+                equipmentFailures: 0
+            },
+            
+            // Season
+            season: 'Spring',
+            seasonWeek: 1,
+            
+            // Milestones
             milestones: {
                 groundSchool: false,
                 preSolo: false,
@@ -2614,16 +2762,39 @@ function resetGame() {
                 writtenTest: false,
                 checkride: false
             },
+            
+            // Logbook
             logbook: [
                 { day: 1, activity: 'Ground School', hours: 0.0, cost: 0 }
             ],
+            
             totalSpent: 0,
             gameEnded: false,
-            endingType: null
+            endingType: null,
+            
+            // Tracking
+            lastFlightDay: 1,
+            lastStudyDay: 1,
+            eventsSinceLastMajor: 0,
+            consecutiveGoodDays: 0,
+            momentum: 50
         };
         
-        // Re-enable buttons
-        document.querySelectorAll('.action-btn').forEach(btn => btn.disabled = false);
+        // Close any open modals (especially game over modal)
+        const gameOverModal = document.getElementById('gameover-modal');
+        if (gameOverModal) {
+            gameOverModal.style.display = 'none';
+            gameOverModal.classList.remove('active');
+        }
+        
+        // Re-enable buttons and remove game-ended class
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.disabled = false;
+            btn.classList.remove('game-ended');
+        });
+        
+        // Clear save data to ensure fresh start
+        localStorage.removeItem('ppl_simulator_save');
         
         initGame();
     }
