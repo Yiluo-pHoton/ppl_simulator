@@ -40,6 +40,7 @@ const dynamicEvents = {
             id: 'ppl_coin_intro',
             text: "A fellow student pilot excitedly shows you his phone. 'Check out PPL Coin! It's a new crypto for pilots. I've already doubled my training fund!'",
             probability: 0.15,
+            condition: (state) => state.day > 10 && state.stats.money > 3000 && !eventChains['ppl_coin'],  // Has money to invest and chain not started
             buttons: [
                 { 
                     text: "Invest $2000", 
@@ -64,6 +65,7 @@ const dynamicEvents = {
             id: 'headset_decision',
             text: "Your borrowed headset finally died mid-flight. The FBO has several options available.",
             probability: 0.2,
+            condition: (state) => state.stats.flightHours > 2 && state.stats.flightHours < 30,  // Early in training when equipment needs arise
             buttons: [
                 { 
                     text: "Basic passive ($100)", 
@@ -86,6 +88,7 @@ const dynamicEvents = {
             id: 'foreflight_subscription',
             text: "Your paper charts are getting expensive to update. ForeFlight has a special student discount.",
             probability: 0.15,
+            condition: (state) => state.stats.flightHours > 5 && state.stats.knowledge > 30,  // After basic navigation training starts
             buttons: [
                 { 
                     text: "Basic Plus ($99/yr)", 
@@ -108,6 +111,7 @@ const dynamicEvents = {
             id: 'fuel_price_spike',
             text: "Fuel prices just jumped 30% due to supply issues. The FBO is apologetic but firm on new rates.",
             probability: 0.1,
+            condition: (state) => state.day > 7 && state.stats.money > 5000,  // After initial training, when money matters more
             buttons: [
                 { 
                     text: "Absorb the cost", 
@@ -243,6 +247,7 @@ const dynamicEvents = {
             id: 'airventure_bounce',
             text: "Video from Oshkosh shows a Bonanza bouncing three times before the left wing strikes the ground. The pilot was fine but shaken.",
             probability: 0.1,
+            condition: (state) => state.stats.flightHours > 3,  // After basic landing training begins
             buttons: [
                 { 
                     text: "Study landing technique", 
@@ -260,6 +265,7 @@ const dynamicEvents = {
             id: 'new_regulations',
             text: "The FAA just announced changes to BasicMed requirements, potentially affecting your future flying.",
             probability: 0.08,
+            condition: (state) => state.stats.knowledge > 25,  // When student understands basic regulations
             buttons: [
                 { 
                     text: "Research the changes", 
@@ -277,6 +283,7 @@ const dynamicEvents = {
             id: 'local_accident',
             text: "A plane crashed at a nearby airport after attempting to land with a tailwind. Both occupants survived.",
             probability: 0.1,
+            condition: (state) => state.stats.flightHours > 5 && state.stats.safety > 40,  // When safety awareness matters
             buttons: [
                 { 
                     text: "Review wind decisions", 
@@ -369,6 +376,7 @@ const dynamicEvents = {
             id: 'family_doubt',
             text: "Your parent calls: 'Isn't flying dangerous? I saw another small plane crash on the news.'",
             probability: 0.12,
+            condition: (state) => state.day > 5 && state.stats.flightHours > 2,  // After family knows you're actively flying
             buttons: [
                 { 
                     text: "Explain safety stats", 
@@ -409,6 +417,7 @@ const dynamicEvents = {
             id: 'old_friend_encouragement',
             text: "An old friend texts: 'Saw your flight training posts! So proud of you chasing your dreams!'",
             probability: 0.1,
+            condition: (state) => state.day > 15 && state.stats.morale < 70,  // When morale boost is most needed
             buttons: [
                 { 
                     text: "Thanks, means a lot!", 
@@ -498,6 +507,7 @@ const dynamicEvents = {
             id: 'social_media_inspiration',
             text: "You see a post: 'One year ago I was scared of flying. Today I passed my checkride!' with celebration photos.",
             probability: 0.1,
+            condition: (state) => state.stats.morale < 65 && state.day > 10,  // When inspiration is most helpful
             buttons: [
                 { 
                     text: "If they can, I can!", 
@@ -510,6 +520,7 @@ const dynamicEvents = {
             id: 'credit_card_offer',
             text: "Pre-approved for a credit card with 0% APR for 18 months. Could fund training now, pay later.",
             probability: 0.08,
+            condition: (state) => state.stats.money < 8000 && state.day > 20,  // When money is getting tight
             buttons: [
                 { 
                     text: "Take $3000 advance", 
@@ -527,6 +538,7 @@ const dynamicEvents = {
             id: 'pet_emergency',
             text: "Your dog needs emergency surgery. The vet bill is $2000.",
             probability: 0.08,
+            condition: (state) => state.stats.money > 3000 && state.day > 15,  // When you have some money saved
             buttons: [
                 { 
                     text: "Do whatever it takes", 
@@ -548,6 +560,7 @@ const dynamicEvents = {
             id: 'plane_maintenance',
             text: "Your usual training plane is down for its 100-hour inspection. The only alternative is a more expensive model.",
             probability: 0.2,
+            condition: (state) => state.lastAction === 'fly' && state.stats.flightHours > 3,  // After some flight experience
             buttons: [
                 { 
                     text: "Fly the expensive one", 
@@ -701,6 +714,7 @@ const dynamicEvents = {
             id: 'discovery_flight_referral',
             text: "A friend wants to try a discovery flight and asks if you know a good instructor. Your CFI offers a referral bonus.",
             probability: 0.10,
+            condition: (state) => state.stats.flightHours > 10 && state.stats.morale > 50,  // When you're enthusiastic enough to promote flying
             buttons: [
                 { 
                     text: "Make the referral", 
