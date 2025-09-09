@@ -1,0 +1,643 @@
+/* PPL Simulator - Compact Single-Box Design */
+
+:root {
+    /* Aviation-themed colors */
+    --cockpit-blue: #1e3a5f;
+    --sky-blue: #87CEEB;
+    --nav-green: #00cc66;
+    --warning-orange: #ff6600;
+    --danger-red: #ff4444;
+    --instrument-white: #f8f9fa;
+    --panel-gray: #2c3e50;
+    
+    /* Weather colors */
+    --weather-clear: linear-gradient(90deg, #87CEEB, #98D8E8);
+    --weather-marginal: linear-gradient(90deg, #FFA500, #FFB84D);
+    --weather-ifr: linear-gradient(90deg, #FF6B6B, #FF8A8A);
+    --weather-storms: linear-gradient(90deg, #6F42C1, #8A5DD8);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: var(--instrument-white);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+/* Main Container */
+.simulator-container {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Unified Control Box - The Heart of the Interface */
+.unified-control-box {
+    background: var(--panel-gray);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(135, 206, 235, 0.2);
+}
+
+/* Weather Header Section */
+.weather-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--weather-clear);
+    color: var(--cockpit-blue);
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.weather-header.weather-clear {
+    background: var(--weather-clear);
+    color: var(--cockpit-blue);
+}
+
+.weather-header.weather-marginal {
+    background: var(--weather-marginal);
+    color: #333;
+}
+
+.weather-header.weather-ifr {
+    background: var(--weather-ifr);
+    color: white;
+}
+
+.weather-header.weather-storms {
+    background: var(--weather-storms);
+    color: white;
+}
+
+.weather-icon {
+    font-size: 1.2rem;
+}
+
+.weather-status {
+    flex: 1;
+    margin: 0 12px;
+}
+
+.day-counter {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+/* Event Content Area */
+.event-content {
+    padding: 16px;
+    min-height: 80px;
+    max-height: 120px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.event-content p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--instrument-white);
+}
+
+/* Scrollbar styling */
+.event-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.event-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.event-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+/* Action Buttons Row */
+.action-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.action-btn-compact {
+    flex: 1;
+    min-height: 40px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, var(--nav-green) 0%, #00aa55 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.action-btn-compact:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 204, 102, 0.3);
+}
+
+.action-btn-compact:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.action-btn-compact:disabled {
+    background: linear-gradient(135deg, #555 0%, #444 100%);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.action-btn-compact.warning {
+    background: linear-gradient(135deg, var(--warning-orange) 0%, #ff5500 100%);
+}
+
+.action-btn-compact.danger {
+    background: linear-gradient(135deg, var(--danger-red) 0%, #ff3333 100%);
+}
+
+.btn-text {
+    font-weight: 600;
+}
+
+.btn-cost {
+    font-size: 0.75rem;
+    opacity: 0.9;
+    margin-top: 2px;
+}
+
+/* Mini Instruments Section */
+.mini-instruments {
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.instrument-row {
+    display: flex;
+    justify-content: space-around;
+    gap: 8px;
+}
+
+.mini-gauge {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    min-width: 60px;
+}
+
+.mini-svg {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 50%;
+    padding: 2px;
+}
+
+/* Ensure needles are visible and rotate from their base point */
+.mini-svg line[id$="-mini-needle"] {
+    /* Use CSS custom property for rotation */
+    transform: rotate(var(--needle-rotation, -120deg));
+    transform-origin: 20px 20px;
+    pointer-events: none;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    stroke-linecap: round;
+    opacity: 1;
+    stroke-width: 2.5px !important;
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+    /* Ensure hardware acceleration */
+    will-change: transform;
+}
+
+.mini-svg circle {
+    opacity: 1;
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.3));
+}
+
+.gauge-fill {
+    transform-origin: center;
+    transform: rotate(-90deg);
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+                stroke 0.3s ease;
+}
+
+.mini-gauge line {
+    transform-origin: 20px 20px;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+                stroke 0.3s ease;
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+.gauge-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 2px;
+}
+
+.gauge-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--instrument-white);
+    transition: color 0.3s ease;
+}
+
+/* Color coding for gauge states - now handled dynamically in JS */
+.mini-gauge.critical .gauge-fill {
+    opacity: 0.9;
+}
+
+.mini-gauge.warning .gauge-fill {
+    opacity: 0.9;
+}
+
+.mini-gauge.good .gauge-fill {
+    opacity: 0.9;
+}
+
+/* Add subtle pulse animation for critical values */
+.mini-gauge.critical .gauge-value {
+    animation: subtlePulse 2s ease-in-out infinite;
+}
+
+@keyframes subtlePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* Dual-Path Progress System */
+.dual-progress-container {
+    background: var(--panel-gray);
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    margin-top: 8px;
+}
+
+.progress-path {
+    margin-bottom: 12px;
+}
+
+.path-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+
+.progress-track {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.progress-step {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.progress-step .step-icon {
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+.progress-step .step-label {
+    font-size: 0.55rem;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.progress-step .step-req {
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.45rem;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+    background: var(--panel-gray);
+    padding: 1px 3px;
+    border-radius: 3px;
+    z-index: 1;
+}
+
+.progress-step.active {
+    background: linear-gradient(135deg, var(--warning-orange) 0%, #ff8833 100%);
+    border-color: var(--warning-orange);
+    color: white;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.progress-step.completed {
+    background: linear-gradient(135deg, var(--nav-green) 0%, #00aa55 100%);
+    border-color: var(--nav-green);
+    color: white;
+}
+
+.progress-step.locked {
+    opacity: 0.5;
+    background: rgba(100, 100, 100, 0.2);
+}
+
+.progress-connector {
+    flex: 1;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 4px;
+    position: relative;
+}
+
+.progress-connector.completed {
+    background: var(--nav-green);
+}
+
+/* PPL Final Achievement */
+.ppl-final {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.final-connector-left,
+.final-connector-right {
+    position: absolute;
+    width: 2px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    top: -8px;
+}
+
+.final-connector-left {
+    left: 25%;
+}
+
+.final-connector-right {
+    right: 25%;
+}
+
+.ppl-badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    border: 3px solid #FFD700;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.ppl-badge.locked {
+    background: rgba(100, 100, 100, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+    opacity: 0.5;
+    box-shadow: none;
+}
+
+.ppl-badge .badge-icon {
+    font-size: 1.5rem;
+}
+
+.ppl-badge .badge-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+@keyframes typewriter {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.event-content p {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Typewriter effect for dramatic text */
+.typewriter-text {
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #87CEEB;
+    overflow: hidden;
+    white-space: nowrap;
+    margin: 0 auto;
+    letter-spacing: 0.1em;
+    animation: typewriter 3s steps(40, end);
+    border-right: 3px solid #87CEEB;
+    animation: typewriter 3s steps(40, end), blink 0.75s step-end infinite;
+}
+
+.dramatic-text {
+    font-style: italic;
+    color: #98D8E8;
+    text-align: center;
+    margin: 20px 0;
+    font-size: 1.05rem;
+    opacity: 0;
+    animation: fadeInSlow 2s ease-in forwards;
+}
+
+@keyframes fadeInSlow {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+    .simulator-container {
+        max-width: 100%;
+    }
+    
+    .weather-header {
+        font-size: 0.85rem;
+        padding: 10px 12px;
+    }
+    
+    .event-content {
+        min-height: 60px;
+        max-height: 100px;
+        padding: 12px;
+    }
+    
+    .action-row {
+        padding: 10px;
+    }
+    
+    .action-btn-compact {
+        min-height: 36px;
+        font-size: 0.85rem;
+    }
+    
+    .mini-instruments {
+        padding: 10px;
+    }
+    
+    .mini-svg {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .milestone-bar {
+        display: none; /* Hide on very small screens */
+    }
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+    .unified-control-box {
+        border-radius: 16px;
+    }
+    
+    .weather-header {
+        padding: 14px 20px;
+        font-size: 1rem;
+    }
+    
+    .event-content {
+        padding: 20px;
+        min-height: 100px;
+        max-height: 140px;
+    }
+    
+    .event-content p {
+        font-size: 1rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: light) {
+    body {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    }
+    
+    .unified-control-box {
+        background: white;
+        color: var(--cockpit-blue);
+    }
+    
+    .event-content {
+        background: rgba(0, 0, 0, 0.05);
+    }
+    
+    .event-content p {
+        color: var(--cockpit-blue);
+    }
+    
+    .mini-instruments {
+        background: rgba(0, 0, 0, 0.05);
+    }
+}
+
+/* Loading state */
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Event-specific button styles */
+.action-btn-compact.event-choice {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+}
+
+.action-btn-compact.event-choice:hover {
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+/* Stat change indicators */
+.stat-change {
+    position: absolute;
+    top: -20px;
+    right: 50%;
+    transform: translateX(50%);
+    font-size: 0.8rem;
+    font-weight: 700;
+    animation: floatUp 1.5s ease-out forwards;
+    pointer-events: none;
+}
+
+.stat-change.positive {
+    color: var(--nav-green);
+}
+
+.stat-change.negative {
+    color: var(--danger-red);
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 1;
+        transform: translateX(50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(50%) translateY(-30px);
+    }
+}

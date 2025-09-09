@@ -2785,12 +2785,7 @@ footer {
     }
 }
 
-@keyframes needleFlutter {
-    0% { transform: rotate(var(--needle-angle, 0deg)) scale(1); }
-    25% { transform: rotate(calc(var(--needle-angle, 0deg) + 2deg)) scale(1.02); }
-    75% { transform: rotate(calc(var(--needle-angle, 0deg) - 1deg)) scale(0.98); }
-    100% { transform: rotate(var(--needle-angle, 0deg)) scale(1); }
-}
+/* Removed needleFlutter animation - handled by JavaScript for consistency */
 
 /* New fade-in animation for value changes */
 @keyframes valueUpdate {
@@ -3132,14 +3127,7 @@ footer {
     animation: statChange 0.3s ease-in-out;
 }
 
-.stat-updated .gauge-svg line[id$="-needle"] {
-    animation: needleFlutter 0.5s ease-in-out;
-}
-
-/* Needle movement effect for realistic instrument behavior */
-.needle-moving {
-    animation: needleFlutter 0.8s ease-in-out;
-}
+/* Needle animations removed - handled by JavaScript for smoother control */
 
 .stat-updated .instrument-value {
     animation: valueUpdate 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPL Simulator - Compact Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style_compact.css">
+</head>
+<body>
+    <div class="simulator-container">
+        <!-- Compact Single Box Interface -->
+        <div class="unified-control-box">
+            <!-- Weather Header with Day Counter -->
+            <div class="weather-header" id="weather-header">
+                <span class="weather-icon">🌤️</span>
+                <span class="weather-status" id="weather-status">Clear skies - Perfect for flying!</span>
+                <span class="day-counter" id="day-counter">Day 1</span>
+            </div>
+            
+            <!-- Event Content Area -->
+            <div class="event-content" id="event-content">
+                <p id="event-text">You stand at the entrance of the flight school, heart racing with excitement. Zero flight experience, zero aviation knowledge—but infinite dreams of soaring through the skies. Time to build your aviation knowledge foundation.</p>
+            </div>
+            
+            <!-- Dynamic Action Buttons -->
+            <div class="action-row" id="action-buttons">
+                <!-- Buttons will be dynamically generated based on context -->
+                <button class="action-btn-compact" onclick="performAction('study')">
+                    <span class="btn-text">Study</span>
+                    <span class="btn-cost">$30</span>
+                </button>
+                <button class="action-btn-compact" onclick="performAction('fly')">
+                    <span class="btn-text">Fly</span>
+                </button>
+                <button class="action-btn-compact" onclick="performAction('rest')">
+                    <span class="btn-text">Rest</span>
+                    <span class="btn-cost">Free</span>
+                </button>
+            </div>
+            
+            <!-- Mini Instruments Display -->
+            <div class="mini-instruments">
+                <!-- Primary Stats Row -->
+                <div class="instrument-row primary">
+                    <div class="mini-gauge" id="morale-gauge">
+                        <svg viewBox="0 0 40 40" class="mini-svg">
+                            <circle cx="20" cy="20" r="18" fill="none" stroke="#333" stroke-width="2"/>
+                            <circle cx="20" cy="20" r="18" fill="none" stroke="#4CAF50" stroke-width="2" 
+                                    stroke-dasharray="113" stroke-dashoffset="28" class="gauge-fill" id="morale-fill"/>
+                            <line x1="20" y1="20" x2="20" y2="4" stroke="#FF4444" stroke-width="2.5" stroke-linecap="round" 
+                                  id="morale-mini-needle"/>
+                            <circle cx="20" cy="20" r="2" fill="#FF4444"/>
+                        </svg>
+                        <div class="gauge-label">MRL</div>
+                        <div class="gauge-value" id="morale-value">75</div>
+                    </div>
+                    
+                    <div class="mini-gauge" id="knowledge-gauge">
+                        <svg viewBox="0 0 40 40" class="mini-svg">
+                            <circle cx="20" cy="20" r="18" fill="none" stroke="#333" stroke-width="2"/>
+                            <circle cx="20" cy="20" r="18" fill="none" stroke="#2196F3" stroke-width="2" 
+                                    stroke-dasharray="113" stroke-dashoffset="79" class="gauge-fill" id="knowledge-fill"/>
+                            <line x1="20" y1="20" x2="20" y2="4" stroke="#44AA44" stroke-width="2.5" stroke-linecap="round" 
+                                  id="knowledge-mini-needle"/>
+                            <circle cx="20" cy="20" r="2" fill="#44AA44"/>
+                        </svg>
+                        <div class="gauge-label">KNW</div>
+                        <div class="gauge-value" id="knowledge-value">30</div>
+                    </div>
+                    
+                    <div class="mini-gauge" id="safety-gauge">
+                        <svg viewBox="0 0 40 40" class="mini-svg">
+                            <circle cx="20" cy="20" r="18" fill="none" stroke="#333" stroke-width="2"/>
+                            <circle cx="20" cy="20" r="18" fill="none" stroke="#FF9800" stroke-width="2" 
+                                    stroke-dasharray="113" stroke-dashoffset="23" class="gauge-fill" id="safety-fill"/>
+                            <line x1="20" y1="20" x2="20" y2="4" stroke="#FFA500" stroke-width="2.5" stroke-linecap="round" 
+                                  id="safety-mini-needle"/>
+                            <circle cx="20" cy="20" r="2" fill="#FFA500"/>
+                        </svg>
+                        <div class="gauge-label">SFT</div>
+                        <div class="gauge-value" id="safety-value">80</div>
+                    </div>
+                </div>
+                
+                <!-- Secondary Stats Row -->
+                <div class="instrument-row secondary">
+                    <div class="mini-gauge" id="hours-gauge">
+                        <svg viewBox="0 0 40 40" class="mini-svg">
+                            <circle cx="20" cy="20" r="18" fill="none" stroke="#333" stroke-width="2"/>
+                            <circle cx="20" cy="20" r="18" fill="none" stroke="#00BCD4" stroke-width="2" 
+                                    stroke-dasharray="113" stroke-dashoffset="113" class="gauge-fill" id="hours-fill"/>
+                            <line x1="20" y1="20" x2="20" y2="4" stroke="#87CEEB" stroke-width="2.5" stroke-linecap="round" 
+                                  id="hours-mini-needle"/>
+                            <circle cx="20" cy="20" r="2" fill="#87CEEB"/>
+                        </svg>
+                        <div class="gauge-label">HRS</div>
+                        <div class="gauge-value" id="hours-value">0.0</div>
+                    </div>
+                    
+                    <div class="mini-gauge" id="money-gauge">
+                        <svg viewBox="0 0 40 40" class="mini-svg">
+                            <circle cx="20" cy="20" r="18" fill="none" stroke="#333" stroke-width="2"/>
+                            <circle cx="20" cy="20" r="18" fill="none" stroke="#FFD700" stroke-width="2" 
+                                    stroke-dasharray="113" stroke-dashoffset="0" class="gauge-fill" id="money-fill"/>
+                            <line x1="20" y1="20" x2="20" y2="4" stroke="#FFD700" stroke-width="2.5" stroke-linecap="round" 
+                                  id="money-mini-needle"/>
+                            <circle cx="20" cy="20" r="2" fill="#FFD700"/>
+                        </svg>
+                        <div class="gauge-label">$$$</div>
+                        <div class="gauge-value" id="money-value">15K</div>
+                    </div>
+                    
+                    <div class="mini-gauge" id="fatigue-gauge">
+                        <svg viewBox="0 0 40 40" class="mini-svg">
+                            <circle cx="20" cy="20" r="18" fill="none" stroke="#333" stroke-width="2"/>
+                            <circle cx="20" cy="20" r="18" fill="none" stroke="#F44336" stroke-width="2" 
+                                    stroke-dasharray="113" stroke-dashoffset="113" class="gauge-fill" id="fatigue-fill"/>
+                            <line x1="20" y1="20" x2="20" y2="4" stroke="#FF6B6B" stroke-width="2.5" stroke-linecap="round" 
+                                  id="fatigue-mini-needle"/>
+                            <circle cx="20" cy="20" r="2" fill="#FF6B6B"/>
+                        </svg>
+                        <div class="gauge-label">FTG</div>
+                        <div class="gauge-value" id="fatigue-value">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dual-Path Progress System -->
+        <div class="dual-progress-container">
+            <!-- Knowledge/Written Path -->
+            <div class="progress-path" id="knowledge-path">
+                <div class="path-label">📚 KNOWLEDGE</div>
+                <div class="progress-track">
+                    <div class="progress-step completed" id="ks-ground">
+                        <span class="step-icon">✓</span>
+                        <span class="step-label">Ground</span>
+                    </div>
+                    <div class="progress-connector"></div>
+                    <div class="progress-step" id="ks-written-prep">
+                        <span class="step-icon">📝</span>
+                        <span class="step-label">Prep</span>
+                    </div>
+                    <div class="progress-connector"></div>
+                    <div class="progress-step locked" id="ks-endorsement">
+                        <span class="step-icon">🔒</span>
+                        <span class="step-label">Endorse</span>
+                    </div>
+                    <div class="progress-connector"></div>
+                    <div class="progress-step locked" id="ks-written">
+                        <span class="step-icon">🔒</span>
+                        <span class="step-label">Written</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Flight Training Path -->
+            <div class="progress-path" id="flight-path">
+                <div class="path-label">✈️ FLIGHT</div>
+                <div class="progress-track">
+                    <div class="progress-step active" id="fs-presolo">
+                        <span class="step-icon">⏳</span>
+                        <span class="step-label">Pre-Solo</span>
+                        <span class="step-req">0/18h 80%/85%</span>
+                    </div>
+                    <div class="progress-connector"></div>
+                    <div class="progress-step locked" id="fs-solo">
+                        <span class="step-icon">🔒</span>
+                        <span class="step-label">Solo</span>
+                    </div>
+                    <div class="progress-connector"></div>
+                    <div class="progress-step locked" id="fs-xc">
+                        <span class="step-icon">🔒</span>
+                        <span class="step-label">XC</span>
+                    </div>
+                    <div class="progress-connector"></div>
+                    <div class="progress-step locked" id="fs-checkride">
+                        <span class="step-icon">🔒</span>
+                        <span class="step-label">Checkride</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PPL Achievement (requires both paths) -->
+            <div class="ppl-final">
+                <div class="final-connector-left"></div>
+                <div class="final-connector-right"></div>
+                <div class="ppl-badge locked" id="ppl-achievement">
+                    <span class="badge-icon">🎖️</span>
+                    <span class="badge-label">PPL</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load game scripts -->
+    <script src="events.js"></script>
+    <script src="game_compact.js"></script>
+</body>
+</html>

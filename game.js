@@ -1247,9 +1247,19 @@ function highlightChangedStats(oldStats, newStats) {
     });
 }
 
+// Track active animations to prevent stacking
+const activeAnimations = new Map();
+
 // Smooth needle animation function
 function animateNeedle(needleEl, fromAngle, toAngle, duration = 800) {
     if (!needleEl) return;
+    
+    // Cancel any existing animation for this needle
+    const needleId = needleEl.id;
+    if (activeAnimations.has(needleId)) {
+        cancelAnimationFrame(activeAnimations.get(needleId));
+        activeAnimations.delete(needleId);
+    }
     
     const startTime = performance.now();
     const angleChange = toAngle - fromAngle;
@@ -1265,11 +1275,15 @@ function animateNeedle(needleEl, fromAngle, toAngle, duration = 800) {
         needleEl.setAttribute('transform', `rotate(${currentAngle} 100 100)`);
         
         if (progress < 1) {
-            requestAnimationFrame(updateNeedle);
+            const animationId = requestAnimationFrame(updateNeedle);
+            activeAnimations.set(needleId, animationId);
+        } else {
+            activeAnimations.delete(needleId);
         }
     }
     
-    requestAnimationFrame(updateNeedle);
+    const animationId = requestAnimationFrame(updateNeedle);
+    activeAnimations.set(needleId, animationId);
 }
 
 // Show floating +/- indicators for stat changes
@@ -2488,16 +2502,8 @@ function updateGauge(statName, value, prefix = '', isCurrency = false, decimals 
         
         // Only update if rotation actually changed significantly
         if (Math.abs(needleRotation - oldRotation) > 0.5) {
-            // Animate the needle smoothly
+            // Animate the needle smoothly without CSS class conflicts
             animateNeedle(needleEl, oldRotation, needleRotation);
-            
-            // Add animation class for large changes
-            if (Math.abs(needleRotation - oldRotation) > 5) {
-                needleEl.classList.add('needle-moving');
-                setTimeout(() => {
-                    if (needleEl) needleEl.classList.remove('needle-moving');
-                }, 800);
-            }
         }
     }
     
