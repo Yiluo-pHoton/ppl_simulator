@@ -1,11 +1,15 @@
 // PPL Simulator - Expanded Event System (100+ Events)
 // Complete event library with chains, consequences, and memorable moments
 
-// Event chain tracking
-let eventChains = {};
+// Event chains are tracked in events.js - reuse if exists
+if (typeof eventChains === 'undefined') {
+    var eventChains = {};
+}
 
 // Weather conditions that affect available options
-const weatherTypes = {
+// Reuse weatherTypes from events.js if it exists, otherwise define it
+if (typeof weatherTypes === 'undefined') {
+    var weatherTypes = {
     clear: { 
         name: 'Clear skies', 
         flyable: true, 
@@ -30,10 +34,17 @@ const weatherTypes = {
         color: 'linear-gradient(90deg, #6F42C1, #8A5DD8)',
         textColor: 'white'
     }
-};
+    };
+}
 
 // Expanded event templates with frequency and chain support
-const dynamicEvents = {
+// Extend the existing dynamicEvents if it exists, otherwise create new
+if (typeof dynamicEvents === 'undefined') {
+    var dynamicEvents = {};
+}
+
+// Add new event categories to dynamicEvents
+Object.assign(dynamicEvents, {
     // Ultra-Rare Events (0.5-2% probability)
     ultraRare: [
         {
@@ -459,10 +470,10 @@ const dynamicEvents = {
     ],
 
     // Financial Events (Mix of one-time and rare)
-    financial: [
+    financialExpanded: [
         // Keep existing financial events
         {
-            id: 'ppl_coin_intro',
+            id: 'ppl_coin_intro_expanded',
             text: "A fellow student pilot excitedly shows you his phone. 'Check out PPL Coin! It's a new crypto for pilots. I've already doubled my training fund!'",
             probability: 0.15,
             frequency: 'once',
@@ -490,33 +501,7 @@ const dynamicEvents = {
             ]
         },
         {
-            id: 'headset_decision',
-            text: "Your borrowed headset finally died mid-flight. The FBO has several options available.",
-            probability: 0.2,
-            frequency: 'once',
-            condition: (state) => state.stats.flightHours > 2 && state.stats.flightHours < 30,
-            buttons: [
-                { 
-                    text: "Basic passive ($100)", 
-                    impact: { money: -100, safety: -2 }, 
-                    outcome: "It works, but the engine noise is fatiguing and ATC is hard to hear.",
-                    chainStart: 'cheap_headset'
-                },
-                { 
-                    text: "ANR Lightspeed ($800)", 
-                    impact: { money: -800, safety: 8, morale: 10 }, 
-                    outcome: "Crystal clear audio and amazing comfort. Flying is so much more enjoyable!",
-                    reputation: { fbo: 1 }
-                },
-                { 
-                    text: "Mid-range Faro ($350)", 
-                    impact: { money: -350, safety: 5, morale: 5 }, 
-                    outcome: "Good balance of features and cost. The noise reduction helps with fatigue."
-                }
-            ]
-        },
-        {
-            id: 'foreflight_subscription',
+            id: 'foreflight_subscription_expanded',
             text: "Your paper charts are getting expensive to update. ForeFlight has a special student discount.",
             probability: 0.15,
             frequency: 'once',
@@ -624,10 +609,10 @@ const dynamicEvents = {
     ],
 
     // Social Events (expanded)
-    social: [
+    socialExpanded: [
         // Keep existing social events and add new ones
         {
-            id: 'cfi_evaluation',
+            id: 'cfi_evaluation_expanded',
             text: "Your CFI sits you down: 'We need to talk about your progress. I have some concerns.'",
             probability: 0.2,
             condition: (state) => state.day > 10,
@@ -757,7 +742,7 @@ const dynamicEvents = {
     ],
 
     // Training Events (expanded with more challenges)
-    training: [
+    trainingExpanded: [
         {
             id: 'simulated_engine_failure',
             text: "Without warning, your CFI pulls the power to idle. 'Engine failure, what do you do?'",
@@ -1012,9 +997,9 @@ const dynamicEvents = {
     ],
 
     // Life Events with consequences
-    life: [
+    lifeExpanded: [
         {
-            id: 'relationship_pressure',
+            id: 'relationship_pressure_expanded',
             text: "Your partner sits you down: 'You're always at the airport. We need to talk about us.'",
             probability: 0.15,
             condition: (state) => state.day > 20,
@@ -1065,7 +1050,7 @@ const dynamicEvents = {
     ],
 
     // Safety/Close Call Events
-    safety: [
+    safetyExpanded: [
         {
             id: 'wake_turbulence_encounter',
             text: "Following a 737 too closely, you hit their wake. The plane rolls 60 degrees!",
@@ -1255,7 +1240,7 @@ const dynamicEvents = {
             ]
         }
     ]
-};
+});
 
 // Function to check for chain events
 function checkChainEvents(gameState) {

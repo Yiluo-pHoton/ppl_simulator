@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event Counter</title>
+    <style>
+        body { font-family: monospace; background: #1a1a1a; color: #0f0; padding: 20px; }
+        .good { color: #0f0; }
+        .bad { color: #f00; }
+        .info { color: #0ff; }
+    </style>
+</head>
+<body>
+    <h1>Event Counter</h1>
+    <pre id="output"></pre>
+    
+    <script src="events.js"></script>
+    <script src="events_expanded.js"></script>
+    <script src="events_training_expanded.js"></script>
+    <script src="events_enhanced_chains.js"></script>
+    <script src="events_morale_challenges.js"></script>
+    
+    <script>
+        function countEvents(obj, prefix = '') {
+            let total = 0;
+            let details = [];
+            
+            for (const [key, value] of Object.entries(obj || {})) {
+                if (Array.isArray(value)) {
+                    const count = value.length;
+                    total += count;
+                    details.push(`${prefix}${key}: ${count}`);
+                }
+            }
+            
+            return { total, details };
+        }
+        
+        let output = '';
+        let grandTotal = 0;
+        
+        // Count events.js (original dynamicEvents)
+        if (typeof dynamicEvents !== 'undefined') {
+            const original = {
+                financial: dynamicEvents.financial,
+                social: dynamicEvents.social,
+                world: dynamicEvents.world,
+                life: dynamicEvents.life,
+                training: dynamicEvents.training,
+                safety: dynamicEvents.safety
+            };
+            
+            const result = countEvents(original);
+            output += '=== events.js (original categories) ===\n';
+            output += result.details.join('\n') + '\n';
+            output += `Subtotal: ${result.total}\n\n`;
+            grandTotal += result.total;
+            
+            // Count expanded categories
+            const expanded = {
+                ultraRare: dynamicEvents.ultraRare,
+                legendary: dynamicEvents.legendary,
+                absurd: dynamicEvents.absurd,
+                equipment: dynamicEvents.equipment,
+                weather: dynamicEvents.weather,
+                financialExpanded: dynamicEvents.financialExpanded,
+                socialExpanded: dynamicEvents.socialExpanded,
+                trainingExpanded: dynamicEvents.trainingExpanded,
+                lifeExpanded: dynamicEvents.lifeExpanded,
+                safetyExpanded: dynamicEvents.safetyExpanded,
+                chainConsequences: dynamicEvents.chainConsequences
+            };
+            
+            const expandedResult = countEvents(expanded);
+            output += '=== events_expanded.js ===\n';
+            output += expandedResult.details.join('\n') + '\n';
+            output += `Subtotal: ${expandedResult.total}\n\n`;
+            grandTotal += expandedResult.total;
+        }
+        
+        // Count training events
+        if (typeof expandedTrainingEvents !== 'undefined') {
+            const result = countEvents(expandedTrainingEvents);
+            output += '=== events_training_expanded.js ===\n';
+            output += result.details.join('\n') + '\n';
+            output += `Subtotal: ${result.total}\n\n`;
+            grandTotal += result.total;
+        }
+        
+        // Count enhanced chain events
+        if (typeof enhancedChainEvents !== 'undefined') {
+            const result = countEvents(enhancedChainEvents);
+            output += '=== events_enhanced_chains.js ===\n';
+            output += result.details.join('\n') + '\n';
+            output += `Subtotal: ${result.total}\n\n`;
+            grandTotal += result.total;
+        }
+        
+        // Count morale events
+        if (typeof moraleChallengeEvents !== 'undefined') {
+            const result = countEvents(moraleChallengeEvents);
+            output += '=== events_morale_challenges.js ===\n';
+            output += result.details.join('\n') + '\n';
+            output += `Subtotal: ${result.total}\n\n`;
+            grandTotal += result.total;
+        }
+        
+        output += '=====================================\n';
+        output += `GRAND TOTAL: ${grandTotal} events\n`;
+        
+        if (grandTotal >= 160) {
+            output += '\n✓ SUCCESS: All events loaded!';
+        } else if (grandTotal >= 123) {
+            output += '\n⚠ PARTIAL: Expected 160, got ' + grandTotal;
+        } else {
+            output += '\n✗ ERROR: Missing many events!';
+        }
+        
+        document.getElementById('output').textContent = output;
+    </script>
+</body>
+</html>

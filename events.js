@@ -1,11 +1,14 @@
 // PPL Simulator - Dynamic Event System
 // Comprehensive event library with context-based actions
 
-// Event chain tracking
-let eventChains = {};
+// Event chain tracking - initialize only if not already defined
+if (typeof eventChains === 'undefined') {
+    var eventChains = {};
+}
 
 // Weather conditions that affect available options
-const weatherTypes = {
+if (typeof weatherTypes === 'undefined') {
+    var weatherTypes = {
     clear: { 
         name: 'Clear skies', 
         flyable: true, 
@@ -30,10 +33,12 @@ const weatherTypes = {
         color: 'linear-gradient(90deg, #6F42C1, #8A5DD8)',
         textColor: 'white'
     }
-};
+    };
+}
 
 // Dynamic event templates
-const dynamicEvents = {
+if (typeof dynamicEvents === 'undefined') {
+    var dynamicEvents = {
     // Financial Events
     financial: [
         {
@@ -65,6 +70,7 @@ const dynamicEvents = {
             id: 'headset_decision',
             text: "Your borrowed headset finally died mid-flight. The FBO has several options available.",
             probability: 0.2,
+            frequency: 'once',
             condition: (state) => state.stats.flightHours > 2 && state.stats.flightHours < 30,  // Early in training when equipment needs arise
             buttons: [
                 { 
@@ -111,22 +117,26 @@ const dynamicEvents = {
             id: 'fuel_price_spike',
             text: "Fuel prices just jumped 30% due to supply issues. The FBO is apologetic but firm on new rates.",
             probability: 0.1,
+            frequency: 'once',
             condition: (state) => state.day > 7 && state.stats.money > 5000,  // After initial training, when money matters more
             buttons: [
                 { 
                     text: "Absorb the cost", 
                     impact: { money: -150, morale: -5 }, 
-                    outcome: "You'll manage, but your budget is getting tighter."
+                    outcome: "You'll manage, but your budget is getting tighter. All future flights cost more.",
+                    chainData: { fuelPriceIncreased: true }
                 },
                 { 
-                    text: "Reduce flight time", 
-                    impact: { morale: -8 }, 
-                    outcome: "You cut lessons to 1 hour each. Progress will be slower but more affordable."
+                    text: "Switch to cheaper airport", 
+                    impact: { fatigue: 10, morale: -3 }, 
+                    outcome: "You find an airport 45min away with better prices. The extra driving adds fatigue to every flight.",
+                    chainData: { cheaperAirport: true, extraDriving: true }
                 },
                 { 
-                    text: "Find cheaper airport", 
-                    impact: { knowledge: 3, fatigue: 5 }, 
-                    outcome: "You discover an airport 30 minutes away with better prices. Worth the drive."
+                    text: "Reduce flight frequency", 
+                    impact: { morale: -10, knowledge: -2 }, 
+                    outcome: "You space out lessons more to afford them. Progress slows but budget stays manageable.",
+                    chainData: { reducedFrequency: true }
                 }
             ]
         }
@@ -731,7 +741,8 @@ const dynamicEvents = {
     ],
 
     // Legacy chain data removed - now using dynamic system in checkChainEvents()
-};
+    };
+}
 
 // Function to get a random event based on conditions (no double probability filtering)
 function selectRandomEvent(gameState) {

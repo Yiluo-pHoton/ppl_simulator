@@ -187,7 +187,7 @@ const expandedTrainingEvents = {
             ]
         },
         {
-            id: 'landing_plateau',
+            id: 'landing_plateau_training',
             text: "10 lessons in a row. Still can't nail landings. CFI: 'Maybe flying isn't for everyone.'",
             probability: 0.12,
             condition: (state) => state.stats.flightHours > 12 && state.stats.flightHours < 20 && !state.milestones.firstSolo,
@@ -234,7 +234,7 @@ const expandedTrainingEvents = {
             ]
         },
         {
-            id: 'stall_fear',
+            id: 'stall_fear_training',
             text: "Time for power-on stalls. Your heart is racing. Memories of roller coasters flood back.",
             probability: 0.20,
             frequency: 'once',
