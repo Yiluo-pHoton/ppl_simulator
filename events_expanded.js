@@ -134,8 +134,8 @@ Object.assign(dynamicEvents, {
             id: 'lottery_ticket_win',
             text: "The scratchers ticket you bought at the FBO... just won $5,000!",
             probability: 0.005,
+            frequency: 'once',  // Can only win lottery once
             memorable: true,
-            frequency: 'once',
             condition: (state) => state.day > 20,
             buttons: [
                 { 
@@ -277,8 +277,8 @@ Object.assign(dynamicEvents, {
             id: 'plane_raffle_win',
             text: "Your flight school raffled off 10 free flight hours. YOUR TICKET WON!",
             probability: 0.004,
+            frequency: 'once',  // Can only win raffle once
             memorable: true,
-            frequency: 'once',
             chainStart: 'karma_chain',
             condition: (state) => state.day > 30,
             buttons: [

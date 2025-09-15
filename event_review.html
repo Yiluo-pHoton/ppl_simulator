@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPL Simulator - Event Review Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        h1 {
+            margin: 0;
+            color: white;
+            font-size: 2em;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .filters {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        label {
+            font-size: 0.85em;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        select, input {
+            padding: 8px 12px;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .event-grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .event-card {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+        }
+        
+        .event-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .event-id {
+            font-family: 'Courier New', monospace;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .event-source {
+            background: #444;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: #aaa;
+        }
+        
+        .event-text {
+            color: #fff;
+            margin: 15px 0;
+            line-height: 1.5;
+            font-style: italic;
+        }
+        
+        .event-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .detail-item {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .detail-label {
+            font-size: 0.75em;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        .condition {
+            background: #1f2937;
+            border: 1px solid #374151;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #10b981;
+            word-break: break-all;
+        }
+        
+        .buttons-container {
+            margin-top: 15px;
+            border-top: 1px solid #444;
+            padding-top: 15px;
+        }
+        
+        .button-option {
+            background: #374151;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .button-text {
+            color: #60a5fa;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .button-impact {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+        
+        .impact-item {
+            background: #1a1a1a;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+        }
+        
+        .positive { color: #10b981; }
+        .negative { color: #ef4444; }
+        .neutral { color: #a78bfa; }
+        
+        .warning {
+            background: #7c2d12;
+            border: 1px solid #ea580c;
+            color: #fed7aa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        
+        .success {
+            background: #14532d;
+            border: 1px solid #16a34a;
+            color: #bbf7d0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        
+        .frequency-once { background: #7c2d12; color: #fed7aa; }
+        .frequency-rare { background: #713f12; color: #fde68a; }
+        .frequency-common { background: #164e63; color: #67e8f9; }
+        .frequency-unlimited { background: #134e4a; color: #6ee7b7; }
+        
+        .memorable {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        
+        .chain-link {
+            background: #1e293b;
+            border: 1px solid #475569;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        
+        .issues-section {
+            background: #7c2d12;
+            border: 2px solid #ea580c;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        
+        .issue-item {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+        
+        #search {
+            padding: 10px;
+            width: 300px;
+            font-size: 16px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>✈️ PPL Simulator Event Review Dashboard</h1>
+        <div class="stats">
+            <div class="stat">Total Events: <span id="total-count">0</span></div>
+            <div class="stat">With Conditions: <span id="condition-count">0</span></div>
+            <div class="stat">With Frequency: <span id="frequency-count">0</span></div>
+            <div class="stat">Memorable: <span id="memorable-count">0</span></div>
+            <div class="stat">Chain Events: <span id="chain-count">0</span></div>
+            <div class="stat">Issues Found: <span id="issue-count">0</span></div>
+        </div>
+    </div>
+    
+    <div class="filters">
+        <div class="filter-group">
+            <label>Search</label>
+            <input type="text" id="search" placeholder="Search by ID or text...">
+        </div>
+        <div class="filter-group">
+            <label>Source File</label>
+            <select id="source-filter">
+                <option value="">All Files</option>
+                <option value="events.js">events.js</option>
+                <option value="events_expanded.js">events_expanded.js</option>
+                <option value="events_training_expanded.js">events_training_expanded.js</option>
+                <option value="events_enhanced_chains.js">events_enhanced_chains.js</option>
+                <option value="events_morale_challenges.js">events_morale_challenges.js</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Has Condition</label>
+            <select id="condition-filter">
+                <option value="">All</option>
+                <option value="yes">With Condition</option>
+                <option value="no">No Condition</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Frequency</label>
+            <select id="frequency-filter">
+                <option value="">All</option>
+                <option value="once">Once Only</option>
+                <option value="rare">Rare</option>
+                <option value="unlimited">Unlimited</option>
+                <option value="none">Not Set</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Issues</label>
+            <select id="issue-filter">
+                <option value="">All</option>
+                <option value="has-issues">Has Issues</option>
+                <option value="no-issues">No Issues</option>
+            </select>
+        </div>
+    </div>
+    
+    <div id="event-grid" class="event-grid"></div>
+    
+    <script src="events.js"></script>
+    <script src="events_expanded.js"></script>
+    <script src="events_training_expanded.js"></script>
+    <script src="events_enhanced_chains.js"></script>
+    <script src="events_morale_challenges.js"></script>
+    
+    <script>
+        let allEvents = [];
+        let stats = {
+            total: 0,
+            withCondition: 0,
+            withFrequency: 0,
+            memorable: 0,
+            chain: 0,
+            issues: 0
+        };
+        
+        function collectEvents() {
+            // Collect from events.js
+            if (typeof dynamicEvents !== 'undefined') {
+                ['financial', 'social', 'world', 'life', 'training', 'safety'].forEach(category => {
+                    if (dynamicEvents[category]) {
+                        dynamicEvents[category].forEach(event => {
+                            allEvents.push({...event, source: 'events.js', category});
+                        });
+                    }
+                });
+                
+                // Expanded categories
+                ['ultraRare', 'legendary', 'absurd', 'equipment', 'weather', 
+                 'financialExpanded', 'socialExpanded', 'trainingExpanded', 
+                 'lifeExpanded', 'safetyExpanded', 'chainConsequences'].forEach(category => {
+                    if (dynamicEvents[category]) {
+                        dynamicEvents[category].forEach(event => {
+                            allEvents.push({...event, source: 'events_expanded.js', category});
+                        });
+                    }
+                });
+            }
+            
+            // Collect from training events
+            if (typeof expandedTrainingEvents !== 'undefined') {
+                Object.keys(expandedTrainingEvents).forEach(category => {
+                    if (expandedTrainingEvents[category]) {
+                        expandedTrainingEvents[category].forEach(event => {
+                            allEvents.push({...event, source: 'events_training_expanded.js', category});
+                        });
+                    }
+                });
+            }
+            
+            // Collect from enhanced chain events
+            if (typeof enhancedChainEvents !== 'undefined') {
+                Object.keys(enhancedChainEvents).forEach(category => {
+                    if (enhancedChainEvents[category]) {
+                        enhancedChainEvents[category].forEach(event => {
+                            allEvents.push({...event, source: 'events_enhanced_chains.js', category});
+                        });
+                    }
+                });
+            }
+            
+            // Collect from morale events
+            if (typeof moraleChallengeEvents !== 'undefined') {
+                Object.keys(moraleChallengeEvents).forEach(category => {
+                    if (moraleChallengeEvents[category]) {
+                        moraleChallengeEvents[category].forEach(event => {
+                            allEvents.push({...event, source: 'events_morale_challenges.js', category});
+                        });
+                    }
+                });
+            }
+        }
+        
+        function analyzeEvent(event) {
+            const issues = [];
+            
+            // Check for missing ID
+            if (!event.id) {
+                issues.push('❌ Missing event ID');
+            }
+            
+            // Check for missing probability
+            if (event.probability === undefined) {
+                issues.push('⚠️ No probability set (defaults to 0.1)');
+            } else if (event.probability > 1 || event.probability < 0) {
+                issues.push('❌ Invalid probability: ' + event.probability);
+            }
+            
+            // Check for empty buttons
+            if (!event.buttons || event.buttons.length === 0) {
+                issues.push('❌ No buttons defined');
+            } else {
+                event.buttons.forEach((btn, i) => {
+                    if (!btn.text) issues.push(`❌ Button ${i+1} missing text`);
+                    if (!btn.impact && !btn.outcome) issues.push(`⚠️ Button ${i+1} has no impact or outcome`);
+                });
+            }
+            
+            // Check condition complexity
+            if (event.condition) {
+                const condStr = event.condition.toString();
+                if (condStr.includes('undefined')) {
+                    issues.push('⚠️ Condition may reference undefined properties');
+                }
+            }
+            
+            // Check for chain events without proper setup
+            if (event.chainLink && !event.condition) {
+                issues.push('⚠️ Chain link without condition');
+            }
+            
+            return issues;
+        }
+        
+        function renderEvent(event) {
+            const issues = analyzeEvent(event);
+            
+            // Update stats
+            stats.total++;
+            if (event.condition) stats.withCondition++;
+            if (event.frequency) stats.withFrequency++;
+            if (event.memorable) stats.memorable++;
+            if (event.chainLink || event.chainStart) stats.chain++;
+            if (issues.length > 0) stats.issues++;
+            
+            const card = document.createElement('div');
+            card.className = 'event-card';
+            card.dataset.source = event.source;
+            card.dataset.hasCondition = event.condition ? 'yes' : 'no';
+            card.dataset.frequency = event.frequency || 'none';
+            card.dataset.hasIssues = issues.length > 0 ? 'has-issues' : 'no-issues';
+            card.dataset.searchText = (event.id + ' ' + event.text).toLowerCase();
+            
+            let frequencyBadge = '';
+            if (event.frequency === 'once') {
+                frequencyBadge = '<span class="frequency-once">ONCE ONLY</span>';
+            } else if (event.frequency === 'rare') {
+                frequencyBadge = '<span class="frequency-rare">RARE</span>';
+            } else if (!event.frequency) {
+                frequencyBadge = '<span class="frequency-unlimited">UNLIMITED</span>';
+            }
+            
+            let memorableBadge = event.memorable ? '<span class="memorable">⭐ MEMORABLE</span>' : '';
+            
+            card.innerHTML = `
+                <div class="event-header">
+                    <div>
+                        <div class="event-id">${event.id || 'NO_ID'}</div>
+                        <span class="event-source">${event.source} / ${event.category}</span>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        ${frequencyBadge}
+                        ${memorableBadge}
+                    </div>
+                </div>
+                
+                <div class="event-text">"${event.text}"</div>
+                
+                <div class="event-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Probability</div>
+                        <div class="detail-value">${event.probability !== undefined ? (event.probability * 100).toFixed(1) + '%' : 'Default (10%)'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Buttons</div>
+                        <div class="detail-value">${event.buttons ? event.buttons.length : 0}</div>
+                    </div>
+                    ${event.chainLink ? `
+                        <div class="detail-item">
+                            <div class="detail-label">Chain Link</div>
+                            <div class="detail-value">${event.chainLink}</div>
+                        </div>
+                    ` : ''}
+                    ${event.chainStart ? `
+                        <div class="detail-item">
+                            <div class="detail-label">Starts Chain</div>
+                            <div class="detail-value">${event.chainStart}</div>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                ${event.condition ? `
+                    <div class="condition">
+                        <div class="detail-label">CONDITION</div>
+                        ${event.condition.toString().replace(/\(state\)\s*=>\s*/, '').replace(/\s+/g, ' ')}
+                    </div>
+                ` : ''}
+                
+                ${issues.length > 0 ? `
+                    <div class="issues-section">
+                        <div class="detail-label">ISSUES FOUND</div>
+                        ${issues.map(issue => `<div class="issue-item">${issue}</div>`).join('')}
+                    </div>
+                ` : '<div class="success">✓ Event properly configured</div>'}
+                
+                <div class="buttons-container">
+                    <div class="detail-label">BUTTON OPTIONS</div>
+                    ${event.buttons ? event.buttons.map(btn => `
+                        <div class="button-option">
+                            <div class="button-text">"${btn.text || 'NO TEXT'}"</div>
+                            ${btn.impact ? `
+                                <div class="button-impact">
+                                    ${Object.entries(btn.impact).map(([key, val]) => `
+                                        <span class="impact-item ${val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral'}">
+                                            ${key}: ${val > 0 ? '+' : ''}${val}
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('') : '<div class="warning">No buttons defined!</div>'}
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        function updateDisplay() {
+            const grid = document.getElementById('event-grid');
+            grid.innerHTML = '';
+            
+            // Reset stats
+            stats = { total: 0, withCondition: 0, withFrequency: 0, memorable: 0, chain: 0, issues: 0 };
+            
+            // Get filter values
+            const sourceFilter = document.getElementById('source-filter').value;
+            const conditionFilter = document.getElementById('condition-filter').value;
+            const frequencyFilter = document.getElementById('frequency-filter').value;
+            const issueFilter = document.getElementById('issue-filter').value;
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            
+            allEvents.forEach(event => {
+                const card = renderEvent(event);
+                
+                // Apply filters
+                let show = true;
+                if (sourceFilter && card.dataset.source !== sourceFilter) show = false;
+                if (conditionFilter && card.dataset.hasCondition !== conditionFilter) show = false;
+                if (frequencyFilter === 'none' && card.dataset.frequency !== 'none') show = false;
+                if (frequencyFilter && frequencyFilter !== 'none' && card.dataset.frequency !== frequencyFilter) show = false;
+                if (issueFilter && card.dataset.hasIssues !== issueFilter) show = false;
+                if (searchTerm && !card.dataset.searchText.includes(searchTerm)) show = false;
+                
+                if (show) {
+                    grid.appendChild(card);
+                }
+            });
+            
+            // Update stats display
+            document.getElementById('total-count').textContent = stats.total;
+            document.getElementById('condition-count').textContent = stats.withCondition;
+            document.getElementById('frequency-count').textContent = stats.withFrequency;
+            document.getElementById('memorable-count').textContent = stats.memorable;
+            document.getElementById('chain-count').textContent = stats.chain;
+            document.getElementById('issue-count').textContent = stats.issues;
+        }
+        
+        // Initialize
+        collectEvents();
+        updateDisplay();
+        
+        // Add event listeners
+        document.getElementById('source-filter').addEventListener('change', updateDisplay);
+        document.getElementById('condition-filter').addEventListener('change', updateDisplay);
+        document.getElementById('frequency-filter').addEventListener('change', updateDisplay);
+        document.getElementById('issue-filter').addEventListener('change', updateDisplay);
+        document.getElementById('search').addEventListener('input', updateDisplay);
+        
+        console.log('Loaded', allEvents.length, 'events for review');
+    </script>
+</body>
+</html>

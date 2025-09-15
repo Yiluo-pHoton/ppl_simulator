@@ -356,6 +356,7 @@ if (typeof dynamicEvents === 'undefined') {
             id: 'aopa_scholarship',
             text: "Email notification: 'Congratulations! You've been awarded a $500 AOPA flight training scholarship!'",
             probability: 0.05,
+            frequency: 'once',  // Can only win scholarship once
             condition: (state) => state.stats.knowledge > 50,
             buttons: [
                 { 
